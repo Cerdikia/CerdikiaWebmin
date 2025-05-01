@@ -1,42 +1,43 @@
 import { useState } from "react";
 
-export default function AddUserModal({
+export default function ModuleModal({
   endpoint,
   isOpen,
   onClose,
   onSave,
-  mapelOptions = [],
   kelasOptions = [],
   fields = [],
   detailData = [],
 }) {
-  const [email, setEmail] = useState("");
-  const [idMapel, setIdMapel] = useState("");
-  const [nama, setNama] = useState("");
-  const [jabatan, setJabatan] = useState("");
-  const [mapel, setMapel] = useState("");
+  const [id_kelas, setid_kelas] = useState(0);
+  const [id_mapel, setid_mapel] = useState(detailData.value);
+  const [module, setmodule] = useState(0);
+  const [module_judul, setmodule_judul] = useState("");
+  const [module_deskripsi, setmodule_deskripsi] = useState("");
   const [loading, setLoading] = useState(false);
-  // const [kelasOptions, setKelasOptions] = useState([]);
-  const [idKelas, setIdKelas] = useState("");
-  const [detail, setDetail] = useState("");
   // console.log(loading);
 
-  mapelOptions.map((mapel) => console.log(mapel));
+  // mapelOptions.map((mapel) => console.log(mapel));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); // Setloading
-    const newData = { email, idMapel, nama, jabatan, mapel, idKelas, detail };
+    const newData = {
+      id_kelas,
+      id_mapel,
+      module,
+      module_judul,
+      module_deskripsi,
+    };
 
     const formData = {};
 
-    if (fields.includes("email")) formData.email = email;
-    if (fields.includes("nama")) formData.nama = nama;
-    if (fields.includes("jabatan")) formData.jabatan = jabatan;
-    if (fields.includes("mapel")) formData.id_mapel = mapel;
-    if (fields.includes("idMapel")) formData.idMapel = idMapel;
-    if (fields.includes("Kelas")) formData.idKelas = idMapel;
-    if (fields.includes("Detail")) formData.detail = idMapel;
+    if (fields.includes("id_kelas")) formData.id_kelas = id_kelas;
+    if (fields.includes("id_mapel")) formData.id_mapel = id_mapel;
+    if (fields.includes("module")) formData.module = module;
+    if (fields.includes("module_judul")) formData.module_judul = module_judul;
+    if (fields.includes("module_deskripsi"))
+      formData.module_deskripsi = module_deskripsi;
 
     try {
       const response = await fetch(
@@ -57,24 +58,14 @@ export default function AddUserModal({
       // kamu bisa tampilkan error juga di sini
     } finally {
       setLoading(false);
-
-      // onSave(newData);
-      // setEmail("");
-      // setIdMapel("");
-      // setNama("");
-      // setJabatan("");
-      // setMapel("");
-      // onClose();
     }
 
     onSave(newData);
-    setEmail("");
-    setIdMapel("");
-    setNama("");
-    setJabatan("");
-    setMapel("");
-    setIdKelas("");
-    setDetail("");
+    setid_kelas(0);
+    setid_mapel(0);
+    setmodule(0);
+    setmodule_judul("");
+    setmodule_deskripsi("");
     onClose();
   };
 
@@ -83,7 +74,6 @@ export default function AddUserModal({
   };
 
   const showField = (fieldName) => fields.includes(fieldName);
-
   return (
     <div
       onClick={onClose}
@@ -97,62 +87,43 @@ export default function AddUserModal({
           isOpen ? "scale-100" : "scale-95"
         }`}
       >
-        <h2 className="text-xl font-bold mb-4">Tambah User Baru</h2>
+        <h2 className="text-xl font-bold mb-4">Tambah Module</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {showField("email") && (
+          {/* {showField("id_mapel") && detailData && (
             <div>
-              <label className="block mb-1">Email</label>
+              <label className="block mb-1">{detailData.title}</label>
               <input
                 type="text"
-                className="w-full border p-2 rounded"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                className="w-full border p-2 rounded bg-gray-100 cursor-not-allowed"
+                value={detailData.text} // tampilkan teksnya
+                readOnly
               />
+              <input type="hidden" value={detailData.value} />
             </div>
-          )}
+          )} */}
 
-          {showField("Detail") && (
+          {showField("id_mapel") && (
             <div>
+              {console.log("ini detail data")}
+              {console.log(detailData)}
               <label className="block mb-1">{detailData.title}</label>
               <input
                 type="text"
                 className="w-full border p-2 rounded"
                 value={detailData.text}
-                onChange={() => setDetail(detailData.value)}
                 required
                 readOnly
               />
             </div>
           )}
 
-          {showField("idMapel") && (
-            <div>
-              <label className="block mb-1">ID Mapel</label>
-              <select
-                className="w-full border p-2 rounded"
-                value={idMapel}
-                onChange={(e) => setIdMapel(e.target.value)}
-                required
-              >
-                <option value="">Pilih Mapel</option>
-                {mapelOptions?.length > 0 &&
-                  mapelOptions.map((mapel) => (
-                    <option key={mapel.id} value={mapel.id}>
-                      {mapel.nama}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          )}
-
-          {showField("Kelas") && (
+          {showField("id_kelas") && (
             <div>
               <label className="block mb-1">Kelas</label>
               <select
                 className="w-full border p-2 rounded"
-                value={idKelas}
-                onChange={(e) => setIdKelas(e.target.value)}
+                value={id_kelas}
+                onChange={(e) => setid_kelas(parseInt(e.target.value))}
                 required
               >
                 <option value="">Pilih Kelas</option>
@@ -166,40 +137,40 @@ export default function AddUserModal({
             </div>
           )}
 
-          {/* {showField("nama") && (
+          {showField("module") && (
             <div>
-              <label className="block mb-1">Nama</label>
+              <label className="block mb-1">Nomor Module</label>
               <input
-                type="text"
+                type="number"
                 className="w-full border p-2 rounded"
-                value={TextDetail}
-                onChange={(e) => setNama(e.target.value)}
-                required
-              />
-            </div>
-          )} */}
-
-          {showField("jabatan") && (
-            <div>
-              <label className="block mb-1">Jabatan</label>
-              <input
-                type="text"
-                className="w-full border p-2 rounded"
-                value={jabatan}
-                onChange={(e) => setJabatan(e.target.value)}
+                value={module}
+                onChange={(e) => setmodule(parseInt(e.target.value))}
                 required
               />
             </div>
           )}
 
-          {showField("mapel") && (
+          {showField("module_judul") && (
             <div>
-              <label className="block mb-1">Mata Pelajaran</label>
+              <label className="block mb-1">Judul Module</label>
               <input
                 type="text"
                 className="w-full border p-2 rounded"
-                value={mapel}
-                onChange={(e) => setMapel(e.target.value)}
+                value={module_judul}
+                onChange={(e) => setmodule_judul(e.target.value)}
+                required
+              />
+            </div>
+          )}
+
+          {showField("module_deskripsi") && (
+            <div>
+              <label className="block mb-1">Deskripsi Module</label>
+              <input
+                type="text"
+                className="w-full border p-2 rounded"
+                value={module_deskripsi}
+                onChange={(e) => setmodule_deskripsi(e.target.value)}
                 required
               />
             </div>

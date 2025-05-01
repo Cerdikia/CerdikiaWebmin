@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation  } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function Sidebar() {
   const location = useLocation(); // dapetin route aktif
@@ -34,7 +34,6 @@ export default function Sidebar() {
         </div>
       </button>
 
-
       {/* ==================== Sidebar 1 Start ================================ */}
       {/* Sidebar */}
       {/* <div
@@ -42,24 +41,29 @@ export default function Sidebar() {
           isOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out z-40`}
       > */}
-        {/* <div className="p-4 pt-16 text-lg font-bold border-b border-gray-600">
+      {/* <div className="p-4 pt-16 text-lg font-bold border-b border-gray-600">
           My App
         </div> */}
-        {/* <nav className="flex flex-col p-4 space-y-4"> */}
-          {/* <Link to="/" onClick={() => setIsOpen(false)} className="hover:bg-gray-700 p-2 rounded">Home</Link> */}
-          {/* <Link to="/" className="hover:bg-gray-700 p-2 rounded">Home</Link>
+      {/* <nav className="flex flex-col p-4 space-y-4"> */}
+      {/* <Link to="/" onClick={() => setIsOpen(false)} className="hover:bg-gray-700 p-2 rounded">Home</Link> */}
+      {/* <Link to="/" className="hover:bg-gray-700 p-2 rounded">Home</Link>
           <Link to="/mapel" className="hover:bg-gray-700 p-2 rounded">Mata Pelajaran</Link>
           <Link to="/logout" className="hover:bg-gray-700 p-2 rounded">Logout</Link>
           <Link to="/blog" className="hover:bg-gray-700 p-2 rounded">blog</Link> */}
-        {/* </nav> */}
+      {/* </nav> */}
       {/* </div> */}
       {/* ==================== Sidebar 1 End ================================ */}
       {/* ==================== Sidebar 2 Start ================================ */}
-            {/* Sidebar */}
-            <div
+      {/* Sidebar */}
+      {/* <div
         className={`fixed top-0 left-0 h-full bg-gray-800 text-white w-64 transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out z-40`}
+      > */}
+      <div
+        className={`fixed top-0 left-0 h-full bg-gray-800 text-white w-64 transform ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 z-40`}
       >
         <div className="p-4 pt-16 text-lg font-bold border-b border-gray-600">
           My App
@@ -81,6 +85,13 @@ export default function Sidebar() {
           ))}
         </nav>
       </div>
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={() => setIsOpen(false)} // Klik di overlay untuk menutup sidebar
+        />
+      )}
       {/* ==================== Sidebar 2 End ================================ */}
 
       {/* Hamburger Button */}
