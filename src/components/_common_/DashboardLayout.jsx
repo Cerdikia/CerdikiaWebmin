@@ -5,7 +5,8 @@ export default function DashboardLayout() {
   return (
     <div className="flex">
       <Sidebar />
-      <div className="flex-1 p-8 ml-0 md:ml-64">
+      {/* <div className="flex-1 p-8 pt-16 ml-0 md:ml-64"> */}
+      <div className="flex-1 p-8 pt-16 ml-0">
         {/* Semua halaman (content) akan ditampilkan di sini */}
         <Outlet />
       </div>

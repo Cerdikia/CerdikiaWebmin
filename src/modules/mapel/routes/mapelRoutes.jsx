@@ -1,26 +1,15 @@
-import { Navigate } from "react-router-dom";
-// import { lazy } from "react";
+import MapelRedirect from "../view/MapelRedirect";
+import GuruPage from "../view/GuruPage";
+import AdminPage from "../view/AdminPage";
+import DetailMapel from "../view/DetailMapel";
+import ModuleDetail from "../view/ModuleDetail";
 
-// const Mapel = lazy(() => import("../view/Mapel"))
+const routes = [
+  { path: "/mapel", element: <MapelRedirect /> },
+  { path: "/guru", element: <GuruPage /> },
+  { path: "/admin", element: <AdminPage /> },
+  { path: "/detail-mapel/:id", element: <DetailMapel /> },
+  { path: "/detail-module/:id", element: <ModuleDetail /> },
+];
 
-// export default[
-//   {
-//     path: '/mapel',
-//     element: <Mapel />
-//   }
-// ]
-export default function MapelRedirect() {
-  const userData = JSON.parse(localStorage.getItem("user_data"));
-
-  // if (!userData) {
-  //   return <Navigate to="/login" replace />; // kalau tidak ada user, balik login
-  // }
-
-  if (userData.Data.role === "guru") {
-    return <Navigate to="/guru" replace />;
-  } else if (userData.Data.role === "admin") {
-    return <Navigate to="/admin" replace />;
-  } else {
-    return <div>Akses tidak diizinkan</div>;
-  }
-}
+export default routes;
