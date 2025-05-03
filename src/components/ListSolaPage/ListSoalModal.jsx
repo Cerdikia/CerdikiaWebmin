@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function ModuleModal({
+export default function ListSoalModal({
   endpoint,
   isOpen,
   onClose,
@@ -33,7 +33,7 @@ export default function ModuleModal({
     const formData = {};
 
     if (fields.includes("id_kelas")) formData.id_kelas = id_kelas;
-    if (fields.includes("id_mapel")) formData.id_mapel = detailData.value;
+    if (fields.includes("id_mapel")) formData.id_mapel = id_mapel;
     if (fields.includes("module")) formData.module = module;
     if (fields.includes("module_judul")) formData.module_judul = module_judul;
     if (fields.includes("module_deskripsi"))
@@ -59,13 +59,10 @@ export default function ModuleModal({
     } finally {
       setLoading(false);
     }
-    // console.log("id_mapel");
-    // console.log(formData.id_mapel);
-    // console.log(id_mapel);
 
     onSave(newData);
     setid_kelas(0);
-    // setid_mapel(0);
+    setid_mapel(0);
     setmodule(0);
     setmodule_judul("");
     setmodule_deskripsi("");
@@ -77,7 +74,6 @@ export default function ModuleModal({
   };
 
   const showField = (fieldName) => fields.includes(fieldName);
-
   return (
     <div
       onClick={onClose}
