@@ -84,7 +84,7 @@ export default function AdminPage() {
 
   const handleRowClick = (id) => {
     // router.push(`/detail-mapel/${id}`);
-    navigate(`/detail-mapel/${id}`);
+    navigate(`/list-module/${id}`);
     // console.log(id);
   };
 
@@ -96,13 +96,6 @@ export default function AdminPage() {
       >
         Tambah Mata Pelajaran
       </button>
-
-      {/* <AddUserModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveUser}
-        mapelOptions={mapelOptions}
-      /> */}
 
       <MapelModal
         endpoint={"genericMapels"}

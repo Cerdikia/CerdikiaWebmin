@@ -1,32 +1,36 @@
-// ${localStorage.getItem("access_token")}
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import RefreshToken from "../../../components/_common_/RefreshToken";
-import AddUserModal from "/src/components/_common_/Modal";
 import FetchData from "../../../components/_common_/FetchData";
+import ModulModal from "../../../components/ModulePage/ModuleModal";
 // import { RefreshToken } from "/src/components/_common_/RefreshToken";
 
-export default function ModuleDetail() {
+export default function ListModule() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [mapel, setMapel] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [kelasList, setKelasList] = useState([]);
+  // const [dataMpel, setDataMpel] = useState([]);
+  const [detail, setDetail] = useState({});
   const userData = JSON.parse(localStorage.getItem("user_data"));
 
   // =====================================
+  // import { useParams } from "react-router-dom";
+  // const { id } = useParams();
+
   if (id) {
     // Simpan ke Local Storage
-    localStorage.setItem("idModule", id);
-    console.log("ID idModule disimpan:", id);
+    localStorage.setItem("idMapel", id);
+    console.log("ID Mapel disimpan:", id);
   } else {
-    console.log("ID idModule tidak ditemukan di URL");
+    console.log("ID Mapel tidak ditemukan di URL");
   }
 
   // Untuk mengambil kembali nilai ID dari localStorage
-  const storedId = localStorage.getItem("idModule");
+  const storedId = localStorage.getItem("idMapel");
   console.log("ID dari Local Storage:", storedId);
   // ========================================
 
@@ -37,14 +41,43 @@ export default function ModuleDetail() {
   const handleSaveUser = (userData) => {
     console.log("User baru:", userData);
     // TODO: Kirim ke API di sini
+    fetchData();
   };
 
   const getKelas = async () => {
     try {
-      const data = await FetchData(localStorage.getItem("access_token"));
+      // const data = await FetchData(localStorage.getItem("access_token"));
+      const data = await FetchData({
+        url: `${import.meta.env.VITE_API_URL}/kelas`,
+        token: localStorage.getItem("access_token"),
+      });
       setKelasList(data);
+      console.log("ini data");
+
+      console.log(data);
     } catch (err) {
       console.error("Gagal mengambil data kelas:", err);
+    }
+  };
+
+  const getMataPelajaran = async (id_mapel) => {
+    try {
+      // const data = await FetchData(localStorage.getItem("access_token"));
+      const data = await FetchData({
+        url: `${import.meta.env.VITE_API_URL}/genericMapel/${id_mapel}`,
+        token: localStorage.getItem("access_token"),
+      });
+      // setDataMpel(data);
+
+      setDetail({
+        title: "Mata Pelajaran",
+        text: data.Data.mapel,
+        value: data.Data.id_mapel,
+      });
+      console.log("ini MATA PELAJARAN");
+      console.log(data);
+    } catch (err) {
+      console.error("Gagal mengambil data mata pelajaran:", err);
     }
   };
 
@@ -101,6 +134,7 @@ export default function ModuleDetail() {
   };
 
   useEffect(() => {
+    getMataPelajaran(storedId);
     getKelas();
     fetchData();
   }, []);
@@ -111,7 +145,7 @@ export default function ModuleDetail() {
 
   const handleRowClick = (id) => {
     // router.push(`/detail-mapel/${id}`);
-    navigate(`/detail-mapel/${id}`);
+    navigate(`/list-soal/${id}`);
     // console.log(id);
   };
 
@@ -121,32 +155,26 @@ export default function ModuleDetail() {
         onClick={() => setIsModalOpen(true)}
         className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
       >
-        Tambah Mata Pelajaran
+        Tambah Module
       </button>
 
-      {/* <AddUserModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSave={handleSaveUser}
-          mapelOptions={mapelOptions}
-        /> */}
-
-      {/* {
-"module": 1, => input module manual | ambil dari tabel module WHERE kelas = id kelas
-  "id_mapel": 1, => ✅
-  "id_kelas": 1, => ambil dari tabel kelas
-  "module": 1, => input module manual 
-  "module_judul": "Belajar Membaca 2", => input module manual 
-  "module_deskripsi": "Untuk kelas 1" => input module manual
-} */}
-
-      <AddUserModal
+      {/* {console.log(kelasList)} */}
+      <ModulModal
+        endpoint={"genericModules"}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveUser}
-        mapelOption={kelasList}
-        fields={["mapel", "idMapel"]}
+        detailData={detail}
+        kelasOptions={kelasList}
+        fields={[
+          "id_kelas",
+          "id_mapel",
+          "module",
+          "module_judul",
+          "module_deskripsi",
+        ]}
       />
+      {console.log(detail)}
       <h1 className="text-3xl font-semibold mb-4">Daftar User</h1>
       <table className="min-w-full table-auto border-collapse border border-gray-300">
         <thead>
@@ -161,11 +189,12 @@ export default function ModuleDetail() {
         </thead>
         <tbody>
           {mapel.length > 0 ? (
+            (console.log(mapel),
             mapel.map((row, index) => (
               <tr
                 key={index}
                 className="hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleRowClick(row.id_mapel)}
+                onClick={() => handleRowClick(row.id_module)}
               >
                 <td className="px-4 py-2">{row.kelas}</td>
                 <td className="px-4 py-2">{row.id_module}</td>
@@ -194,7 +223,7 @@ export default function ModuleDetail() {
                   </button>
                 </td>
               </tr>
-            ))
+            )))
           ) : (
             <tr>
               <td colSpan="3" className="px-4 py-2 text-center">
