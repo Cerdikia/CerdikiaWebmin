@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
 import { Link, useLocation } from "react-router-dom";
 
 export default function Sidebar() {
@@ -9,11 +10,24 @@ export default function Sidebar() {
     setIsOpen(!isOpen);
   };
 
+  const [shouldLogout, setShouldLogout] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_data");
+
+    setShouldLogout(true);
+  };
+
+  if (shouldLogout) {
+    return <Navigate to="/login" replace />;
+  }
+
   const menuItems = [
     { path: "/", label: "Home" },
     { path: "/mapel", label: "mapel" },
     { path: "/blog", label: "Blog" },
-    { path: "/logout", label: "Logout" },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -83,6 +97,12 @@ export default function Sidebar() {
               {item.label}
             </Link>
           ))}
+          <button
+            onClick={handleLogout}
+            className={`p-2 rounded hover:bg-gray-700 text-left w-full`}
+          >
+            Logout
+          </button>
         </nav>
       </div>
 

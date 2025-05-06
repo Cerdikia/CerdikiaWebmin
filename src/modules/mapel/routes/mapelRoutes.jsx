@@ -10,7 +10,7 @@ import EditSoal from "../view/EditSoal";
 const routes = [
   { path: "/mapel", element: <MapelRedirect /> },
   { path: "/guru", element: <GuruPage /> },
-  { path: "/admin", element: <AdminPage /> },
+  { path: "/admin-mapel", element: <AdminPage /> },
   { path: "/list-module/:id", element: <ListModule /> },
   { path: "/list-soal/:id", element: <ListSoal /> },
   { path: "/upload-soal/:id", element: <UploadSoal /> },
