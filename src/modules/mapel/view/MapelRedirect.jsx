@@ -10,7 +10,7 @@ export default function MapelRedirect() {
   if (userData.role === "guru") {
     return <Navigate to="/guru" replace />;
   } else if (userData.role === "admin") {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/admin-mapel" replace />;
   } else {
     return <div>Akses tidak diizinkan</div>;
   }

@@ -12,10 +12,15 @@
 import { lazy } from "react";
 
 const HomePage = lazy(() => import("../view/HomePage"));
+const GuruPage = lazy(() => import("../view/GuruPage"));
 
 export default [
   {
-    path: '/',
+    path: "/",
     element: <HomePage />,
-  }
+  },
+  {
+    path: "/guru",
+    element: <HomePage />,
+  },
 ];

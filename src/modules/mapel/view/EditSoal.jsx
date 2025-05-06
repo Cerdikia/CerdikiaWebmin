@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import ReactQuill from "react-quill";
 import Quill from "quill";
@@ -33,6 +33,7 @@ export default function UploadSoal() {
         ["bold", "italic", "underline"],
         [{ list: "ordered" }, { list: "bullet" }],
         ["link", "image"],
+        [{ align: [] }, { direction: "rtl" }],
         ["clean"],
       ],
       handlers: {
@@ -48,6 +49,58 @@ export default function UploadSoal() {
   const modulesB = useMemo(() => createModules(quillOpsiBRef), []);
   const modulesC = useMemo(() => createModules(quillOpsiCRef), []);
   const modulesD = useMemo(() => createModules(quillOpsiDRef), []);
+
+  const fetchData = async () => {
+    try {
+      let response = await fetch(
+        `${import.meta.env.VITE_API_URL}/genericModules?id_mapel=${id}&finished=0`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
+
+      console.log(response);
+
+      if (response.status === 401) {
+        // Kalau 401, berarti token expired, refresh token dulu
+        let refreshed = await RefreshToken();
+
+        if (refreshed) {
+          // Setelah refresh sukses, ulang fetch
+          response = await fetch(
+            `${import.meta.env.VITE_API_URL}/genericModules?id_mapel=${id}&finished=0`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+              },
+            }
+          );
+        } else {
+          // Kalau refresh gagal, redirect ke login
+          window.location.href = "/login";
+          // <Navigate to="/login" replace />;
+          return;
+        }
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      if (data.Data) {
+        setMapel(data.Data);
+      } else {
+        setMapel([]);
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+
+      setMapel([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const imageHandler = async (editorRef) => {
     const quill = editorRef?.current?.getEditor();
@@ -163,6 +216,11 @@ export default function UploadSoal() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Fungsi yang ingin dipanggil saat komponen pertama kali dirender
+    fetchData();
+  }, []); // dependensi kosong artinya hanya dijalankan sekali (saat mount)
 
   return (
     <div className="p-4 w-full">
