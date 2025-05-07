@@ -1,136 +1,193 @@
-import { useState } from "react";
-import { Navigate } from "react-router-dom";
-import { Link, useLocation } from "react-router-dom";
+"use client"
+
+import { useState, useEffect } from "react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
+import { signOut } from "firebase/auth"
+import { auth } from "../../firebase-config"
+import { Menu, X, Home, Book, FileText, Users, LogOut, ChevronDown } from "lucide-react"
 
 export default function Sidebar() {
-  const location = useLocation(); // dapetin route aktif
-  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [isOpen, setIsOpen] = useState(false)
+  const [userData, setUserData] = useState(null)
+  const [activeSubmenu, setActiveSubmenu] = useState(null)
+
+  useEffect(() => {
+    const data = localStorage.getItem("user_data")
+    if (data) {
+      setUserData(JSON.parse(data))
+    }
+  }, [])
 
   const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+    setIsOpen(!isOpen)
+  }
 
-  const [shouldLogout, setShouldLogout] = useState(false);
+  const toggleSubmenu = (menu) => {
+    if (activeSubmenu === menu) {
+      setActiveSubmenu(null)
+    } else {
+      setActiveSubmenu(menu)
+    }
+  }
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("user_data");
-
-    setShouldLogout(true);
-  };
-
-  if (shouldLogout) {
-    return <Navigate to="/login" replace />;
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      localStorage.removeItem("token")
+      localStorage.removeItem("refresh_token")
+      localStorage.removeItem("user_data")
+      navigate("/login", { replace: true })
+    } catch (error) {
+      console.error("Logout error:", error)
+    }
   }
 
   const menuItems = [
-    { path: "/", label: "Home" },
-    { path: "/mapel", label: "mapel" },
-    { path: "/blog", label: "Blog" },
-  ];
+    {
+      path: "/",
+      label: "Dashboard",
+      icon: Home,
+    },
+    {
+      path: "/mapel",
+      label: "Mata Pelajaran",
+      icon: Book,
+    },
+    {
+      label: "Manajemen Soal",
+      icon: FileText,
+      submenu: [
+        { path: "/list-soal", label: "Daftar Soal" },
+        { path: "/upload-soal", label: "Upload Soal" },
+      ],
+    },
+    {
+      path: "/blog",
+      label: "Blog",
+      icon: FileText,
+    },
+    {
+      path: "/users",
+      label: "Pengguna",
+      icon: Users,
+    },
+  ]
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => location.pathname === path
 
   return (
-    <div className="flex">
-      {/* Hamburger Button */}
+    <>
+      {/* Mobile menu button */}
       <button
-        className={`fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-md focus:outline-none transition-transform duration-300 ${
-          isOpen ? "rotate-180" : ""
-        }`} // Tambahkan class untuk rotasi saat sidebar terbuka
+        className="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-md focus:outline-none lg:hidden"
         onClick={toggleSidebar}
       >
-        <div className="space-y-1">
-          <span className="block w-6 h-0.5 bg-white"></span>
-          <span className="block w-6 h-0.5 bg-white"></span>
-          <span className="block w-6 h-0.5 bg-white"></span>
-        </div>
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* ==================== Sidebar 1 Start ================================ */}
       {/* Sidebar */}
-      {/* <div
-        className={`fixed top-0 left-0 h-full bg-gray-800 text-white w-64 transform ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out z-40`}
-      > */}
-      {/* <div className="p-4 pt-16 text-lg font-bold border-b border-gray-600">
-          My App
-        </div> */}
-      {/* <nav className="flex flex-col p-4 space-y-4"> */}
-      {/* <Link to="/" onClick={() => setIsOpen(false)} className="hover:bg-gray-700 p-2 rounded">Home</Link> */}
-      {/* <Link to="/" className="hover:bg-gray-700 p-2 rounded">Home</Link>
-          <Link to="/mapel" className="hover:bg-gray-700 p-2 rounded">Mata Pelajaran</Link>
-          <Link to="/logout" className="hover:bg-gray-700 p-2 rounded">Logout</Link>
-          <Link to="/blog" className="hover:bg-gray-700 p-2 rounded">blog</Link> */}
-      {/* </nav> */}
-      {/* </div> */}
-      {/* ==================== Sidebar 1 End ================================ */}
-      {/* ==================== Sidebar 2 Start ================================ */}
-      {/* Sidebar */}
-      {/* <div
-        className={`fixed top-0 left-0 h-full bg-gray-800 text-white w-64 transform ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out z-40`}
-      > */}
       <div
-        className={`fixed top-0 left-0 h-full bg-gray-800 text-white w-64 transform ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 z-40`}
+        className={`fixed top-0 left-0 h-full bg-white shadow-xl w-72 transform transition-transform duration-300 ease-in-out z-40 ${
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
       >
-        <div className="p-4 pt-16 text-lg font-bold border-b border-gray-600">
-          My App
+        {/* Logo and brand */}
+        <div className="flex items-center justify-center h-20 border-b border-gray-200">
+          <h1 className="text-xl font-bold text-indigo-600">Cerdikia Webmin</h1>
         </div>
-        <nav className="flex flex-col p-4 space-y-4">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`p-2 rounded ${
-                isActive(item.path)
-                  ? "bg-gray-700 font-semibold"
-                  : "hover:bg-gray-700"
-              }`}
-              onClick={() => setIsOpen(false)} // klik link sekalian nutup sidebar
+
+        {/* User info */}
+        {userData && (
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold">
+                {userData.email?.charAt(0).toUpperCase() || "U"}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{userData.email || "User"}</p>
+                <p className="text-xs text-gray-500 capitalize">{userData.role || "User"}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <nav className="px-4 py-4">
+          <ul className="space-y-1">
+            {menuItems.map((item, index) => (
+              <li key={index}>
+                {item.submenu ? (
+                  <div className="mb-2">
+                    <button
+                      onClick={() => toggleSubmenu(item.label)}
+                      className="flex items-center justify-between w-full px-4 py-2.5 text-left text-sm font-medium rounded-lg hover:bg-gray-100"
+                    >
+                      <div className="flex items-center">
+                        {item.icon && <item.icon className="w-5 h-5 mr-3 text-gray-500" />}
+                        <span>{item.label}</span>
+                      </div>
+                      <ChevronDown
+                        className={`w-4 h-4 transition-transform ${activeSubmenu === item.label ? "rotate-180" : ""}`}
+                      />
+                    </button>
+
+                    {activeSubmenu === item.label && (
+                      <ul className="pl-10 mt-1 space-y-1">
+                        {item.submenu.map((subItem, subIndex) => (
+                          <li key={subIndex}>
+                            <Link
+                              to={subItem.path}
+                              className={`block px-4 py-2 text-sm rounded-lg ${
+                                isActive(subItem.path)
+                                  ? "bg-indigo-50 text-indigo-600 font-medium"
+                                  : "text-gray-600 hover:bg-gray-50"
+                              }`}
+                              onClick={() => setIsOpen(false)}
+                            >
+                              {subItem.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    to={item.path}
+                    className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
+                      isActive(item.path) ? "bg-indigo-50 text-indigo-600" : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.icon && <item.icon className="w-5 h-5 mr-3" />}
+                    {item.label}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          <div className="pt-6 mt-6 border-t border-gray-200">
+            <button
+              onClick={handleLogout}
+              className="flex items-center w-full px-4 py-2.5 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50"
             >
-              {item.label}
-            </Link>
-          ))}
-          <button
-            onClick={handleLogout}
-            className={`p-2 rounded hover:bg-gray-700 text-left w-full`}
-          >
-            Logout
-          </button>
+              <LogOut className="w-5 h-5 mr-3" />
+              Logout
+            </button>
+          </div>
         </nav>
       </div>
 
+      {/* Overlay for mobile */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30"
-          onClick={() => setIsOpen(false)} // Klik di overlay untuk menutup sidebar
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden" onClick={() => setIsOpen(false)} />
       )}
-      {/* ==================== Sidebar 2 End ================================ */}
 
-      {/* Hamburger Button */}
-      {/* <button
-        className="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-md focus:outline-none"
-        onClick={toggleSidebar}
-      >
-        <div className="space-y-1">
-          <span className="block w-6 h-0.5 bg-white"></span>
-          <span className="block w-6 h-0.5 bg-white"></span>
-          <span className="block w-6 h-0.5 bg-white"></span>
-        </div>
-      </button> */}
-
-      {/* Main Content */}
-      {/* <div className="flex-1 p-8 ml-0 md:ml-64">
-        <h1 className="text-2xl font-bold mb-4">Main Content Area</h1>
-        <p>Isi halaman utama di sini...</p>
-      </div> */}
-    </div>
-  );
+      {/* Main content wrapper with padding for sidebar */}
+      <div className="lg:pl-72 min-h-screen transition-all duration-300">{/* Your page content goes here */}</div>
+    </>
+  )
 }
