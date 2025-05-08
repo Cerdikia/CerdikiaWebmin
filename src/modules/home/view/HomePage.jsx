@@ -43,10 +43,77 @@ export default function HomePage() {
   })
   const [recentActivity, setRecentActivity] = useState([])
   const [loading, setLoading] = useState(true)
-
+  const [activitiesLoading, setActivitiesLoading] = useState(true)
   const [chartLoading, setChartLoading] = useState(true)
   const [chartData, setChartData] = useState([])
   const [chartPeriod, setChartPeriod] = useState("week") // Default to week
+
+  // Format relative time
+  const formatRelativeTime = (dateString) => {
+    const now = new Date()
+    const date = new Date(dateString)
+    const diffInSeconds = Math.floor((now - date) / 1000)
+
+    if (diffInSeconds < 60) {
+      return "baru saja"
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60)
+      return `${minutes} menit yang lalu`
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600)
+      return `${hours} jam yang lalu`
+    } else if (diffInSeconds < 604800) {
+      const days = Math.floor(diffInSeconds / 86400)
+      return `${days} hari yang lalu`
+    } else {
+      return date.toLocaleDateString("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    }
+  }
+
+  // Fetch recent activities
+  const fetchRecentActivities = async () => {
+    try {
+      setActivitiesLoading(true)
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/recent-activities?page=1&limit=7`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch recent activities")
+      }
+
+      const data = await response.json()
+
+      if (data.data && data.data.activities) {
+        // Format the activities data
+        const formattedActivities = data.data.activities.map(
+          (activity, index) => ({
+            id: activity.id_logs || index,
+            email: activity.email,
+            mapel: activity.nama_mapel,
+            time: formatRelativeTime(activity.created_at),
+            type: "user", // Default type for icon
+          }),
+        )
+
+        setRecentActivity(formattedActivities)
+      }
+    } catch (error) {
+      console.error("Error fetching recent activities:", error)
+      setRecentActivity([])
+    } finally {
+      setActivitiesLoading(false)
+    }
+  }
 
   // Fetch logs data based on selected period
   const fetchLogsData = async (period) => {
@@ -143,37 +210,6 @@ export default function HomePage() {
 
         const userData = await getAllUsersResponse.json()
         // =============== Fetch User Data ========================
-        // =============== Fetch Mapel Data ========================
-        // Fetch real user data from the API
-        const getAllMapelResponse = await fetch(
-          `${import.meta.env.VITE_API_URL}/genericAllMapels`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-            },
-          },
-        )
-
-        if (!getAllMapelResponse.ok) {
-          throw new Error("Failed to fetch data")
-        }
-
-        const mapelData = await getAllMapelResponse.json()
-        // =============== END Fetch User Mapel ========================
-        // =============== Fetch Stats Lainnya ========================
-        // Fetch real user data from the API
-        const getStats = await fetch(`${import.meta.env.VITE_API_URL}/stats `, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        })
-
-        if (!getStats.ok) {
-          throw new Error("Failed to fetch data")
-        }
-
-        const statsData = await getStats.json()
-        // =============== end Fetch stats lainnya ========================
 
         // Simulate API call delay
         await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -184,33 +220,6 @@ export default function HomePage() {
           modules: userData.data ? userData.data.total_module : 0,
           soal: userData.data ? userData.data.total_soal : 0,
         })
-
-        setRecentActivity([
-          {
-            id: 1,
-            type: "soal",
-            title: "Soal Matematika Kelas 6 ditambahkan",
-            time: "2 jam yang lalu",
-          },
-          {
-            id: 2,
-            type: "user",
-            title: "Pengguna baru: Budi Santoso",
-            time: "5 jam yang lalu",
-          },
-          {
-            id: 3,
-            type: "module",
-            title: "Modul Bahasa Indonesia diperbarui",
-            time: "1 hari yang lalu",
-          },
-          {
-            id: 4,
-            type: "mapel",
-            title: "Mata pelajaran IPA ditambahkan",
-            time: "2 hari yang lalu",
-          },
-        ])
       } catch (error) {
         console.error("Error fetching dashboard data:", error)
       } finally {
@@ -218,6 +227,7 @@ export default function HomePage() {
       }
     }
 
+    fetchRecentActivities() // Fetch recent activities
     fetchData()
     fetchLogsData(chartPeriod) // Initial fetch of logs data
   }, [])
@@ -381,13 +391,19 @@ export default function HomePage() {
           </div>
 
           <div className="space-y-4">
-            {recentActivity.map((activity) => (
-              <div
-                key={activity.id}
-                className="flex items-start pb-4 border-b border-gray-100 last:border-0"
-              >
-                <div className="mr-4">
-                  {activity.type === "user" && (
+            {/* {recentActivity.map((activity) => ( */}
+            {activitiesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : recentActivity.length > 0 ? (
+              recentActivity.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-start pb-4 border-b border-gray-100 last:border-0"
+                >
+                  <div className="mr-4">
+                    {/* {activity.type === "user" && (
                     <Users className="w-5 h-5 text-blue-500" />
                   )}
                   {activity.type === "mapel" && (
@@ -398,14 +414,25 @@ export default function HomePage() {
                   )}
                   {activity.type === "soal" && (
                     <CheckCircle className="w-5 h-5 text-amber-500" />
-                  )}
+                  )} */}
+                    <CheckCircle className="w-5 h-5 text-amber-500" />
+                  </div>
+                  <div>
+                    {/* <p className="text-sm font-medium">{activity.title}</p> */}
+                    <p className="text-sm font-medium">
+                      {activity.email} | {activity.mapel}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {activity.time}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium">{activity.title}</p>
-                  <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>Tidak ada aktivitas terbaru</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

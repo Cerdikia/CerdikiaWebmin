@@ -21,9 +21,15 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const [userData, setUserData] = useState(null)
   const [activeSubmenu, setActiveSubmenu] = useState(null)
+  const [userRole, setUserRole] = useState(null)
 
   useEffect(() => {
     const data = localStorage.getItem("user_data")
+    const jsonData = JSON.parse(data)
+    setUserRole(jsonData.role)
+
+    // console.log(userData)
+
     if (data) {
       setUserData(JSON.parse(data))
     }
@@ -58,11 +64,13 @@ export default function Sidebar() {
       path: "/",
       label: "Dashboard",
       icon: Home,
+      roles: ["admin", "guru"],
     },
     {
       path: "/mapel",
       label: "Mata Pelajaran",
       icon: Book,
+      roles: ["admin", "guru"],
     },
     {
       label: "Manajemen Soal",
@@ -71,16 +79,19 @@ export default function Sidebar() {
         { path: "/list-soal", label: "Daftar Soal" },
         { path: "/upload-soal", label: "Upload Soal" },
       ],
+      roles: ["admin", "guru"],
     },
     {
       path: "/blog",
       label: "Blog",
       icon: FileText,
+      roles: [],
     },
     {
       path: "/users",
       label: "Pengguna",
       icon: Users,
+      roles: ["admin", "guru"],
     },
   ]
 
@@ -109,10 +120,28 @@ export default function Sidebar() {
 
         {/* User info */}
         {userData && (
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
+          <div
+            className="px-6 py-4 border-b border-gray-200 cursor-pointer"
+            onClick={() =>
+              navigate(`/users/edit/${encodeURIComponent(userData.email)}`, {
+                state: { user: userData, role: userData.role },
+              })
+            }
+          >
+            <div
+              className="flex items-center space-x-3"
+              // onClick={() =>
+              //   // navigate(`/users/edit/${encodeURIComponent(userData.email)}`)
+              //   navigate(`/users/edit/${userData.email}`)
+              // }
+            >
               <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold">
-                {userData.email?.charAt(0).toUpperCase() || "U"}
+                {/* {userData.email?.charAt(0).toUpperCase() || "U"} */}
+                <img
+                  className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                  src={userData.image_profile || "/img/default_user.png"}
+                  alt={userData.email}
+                />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
@@ -129,61 +158,63 @@ export default function Sidebar() {
         {/* Navigation */}
         <nav className="px-4 py-4">
           <ul className="space-y-1">
-            {menuItems.map((item, index) => (
-              <li key={index}>
-                {item.submenu ? (
-                  <div className="mb-2">
-                    <button
-                      onClick={() => toggleSubmenu(item.label)}
-                      className="flex items-center justify-between w-full px-4 py-2.5 text-left text-sm font-medium rounded-lg hover:bg-gray-100"
-                    >
-                      <div className="flex items-center">
-                        {item.icon && (
-                          <item.icon className="w-5 h-5 mr-3 text-gray-500" />
-                        )}
-                        <span>{item.label}</span>
-                      </div>
-                      <ChevronDown
-                        className={`w-4 h-4 transition-transform ${activeSubmenu === item.label ? "rotate-180" : ""}`}
-                      />
-                    </button>
+            {menuItems
+              .filter((item) => item.roles.includes(userRole))
+              .map((item, index) => (
+                <li key={index}>
+                  {item.submenu ? (
+                    <div className="mb-2">
+                      <button
+                        onClick={() => toggleSubmenu(item.label)}
+                        className="flex items-center justify-between w-full px-4 py-2.5 text-left text-sm font-medium rounded-lg hover:bg-gray-100"
+                      >
+                        <div className="flex items-center">
+                          {item.icon && (
+                            <item.icon className="w-5 h-5 mr-3 text-gray-500" />
+                          )}
+                          <span>{item.label}</span>
+                        </div>
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform ${activeSubmenu === item.label ? "rotate-180" : ""}`}
+                        />
+                      </button>
 
-                    {activeSubmenu === item.label && (
-                      <ul className="pl-10 mt-1 space-y-1">
-                        {item.submenu.map((subItem, subIndex) => (
-                          <li key={subIndex}>
-                            <Link
-                              to={subItem.path}
-                              className={`block px-4 py-2 text-sm rounded-lg ${
-                                isActive(subItem.path)
-                                  ? "bg-indigo-50 text-indigo-600 font-medium"
-                                  : "text-gray-600 hover:bg-gray-50"
-                              }`}
-                              onClick={() => setIsOpen(false)}
-                            >
-                              {subItem.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    to={item.path}
-                    className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
-                      isActive(item.path)
-                        ? "bg-indigo-50 text-indigo-600"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.icon && <item.icon className="w-5 h-5 mr-3" />}
-                    {item.label}
-                  </Link>
-                )}
-              </li>
-            ))}
+                      {activeSubmenu === item.label && (
+                        <ul className="pl-10 mt-1 space-y-1">
+                          {item.submenu.map((subItem, subIndex) => (
+                            <li key={subIndex}>
+                              <Link
+                                to={subItem.path}
+                                className={`block px-4 py-2 text-sm rounded-lg ${
+                                  isActive(subItem.path)
+                                    ? "bg-indigo-50 text-indigo-600 font-medium"
+                                    : "text-gray-600 hover:bg-gray-50"
+                                }`}
+                                onClick={() => setIsOpen(false)}
+                              >
+                                {subItem.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
+                        isActive(item.path)
+                          ? "bg-indigo-50 text-indigo-600"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {item.icon && <item.icon className="w-5 h-5 mr-3" />}
+                      {item.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
           </ul>
 
           <div className="pt-6 mt-6 border-t border-gray-200">
