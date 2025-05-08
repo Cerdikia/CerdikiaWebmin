@@ -6,7 +6,7 @@ export default function DashboardLayout() {
   return (
     <div className="flex bg-gray-50 min-h-screen">
       <Sidebar />
-      <div className="flex-1 lg:ml-72">
+      <div className="flex-1 lg:ml-4">
         <main className="p-6">
           <Suspense
             fallback={
