@@ -1,6 +1,6 @@
-import { Suspense } from "react";
-import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import { Suspense } from "react"
+import { Outlet } from "react-router-dom"
+import Sidebar from "./Sidebar"
 
 export default function DashboardLayout() {
   return (
@@ -23,5 +23,5 @@ export default function DashboardLayout() {
         </main>
       </div>
     </div>
-  );
+  )
 }

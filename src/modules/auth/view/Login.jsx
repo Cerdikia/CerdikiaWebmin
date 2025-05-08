@@ -1,48 +1,48 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
-} from "firebase/auth";
-import { auth } from "../../../firebase-config";
+} from "firebase/auth"
+import { auth } from "../../../firebase-config"
 
-const provider = new GoogleAuthProvider();
+const provider = new GoogleAuthProvider()
 provider.setCustomParameters({
   prompt: "select_account",
-});
+})
 
 export default function Login() {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const navigate = useNavigate()
+  const [email, setEmail] = useState("")
+  const [role, setRole] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   useEffect(() => {
-    console.log(import.meta.env.VITE_API_URL);
+    console.log(import.meta.env.VITE_API_URL)
     // Handle redirect result
     getRedirectResult(auth)
       .then((result) => {
         if (result && result.user) {
-          const userEmail = result.user.email;
-          setEmail(userEmail);
+          const userEmail = result.user.email
+          setEmail(userEmail)
         }
       })
       .catch((error) => {
-        console.error("Redirect login error:", error);
-        setError("Login gagal: " + error.message);
-      });
-  }, []);
+        console.error("Redirect login error:", error)
+        setError("Login gagal: " + error.message)
+      })
+  }, [])
 
   useEffect(() => {
     if (email) {
-      console.log("Email berhasil diset:", email);
+      console.log("Email berhasil diset:", email)
     }
-  }, [email]);
+  }, [email])
 
   // const handleContinueWithRole = async (e) => {
   //   e.preventDefault();
@@ -140,19 +140,19 @@ export default function Login() {
   // };
 
   const handleContinueWithRole = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!role) {
-      setError("Silakan pilih role terlebih dahulu");
-      return;
+      setError("Silakan pilih role terlebih dahulu")
+      return
     }
 
     if (!email) {
-      setError("Silakan login dengan Google terlebih dahulu");
-      return;
+      setError("Silakan login dengan Google terlebih dahulu")
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
 
     try {
       // In a real app, you would verify the role with your backend
@@ -167,20 +167,20 @@ export default function Login() {
           email,
           role,
         }),
-      });
+      })
 
       if (response.status === 401) {
-        setError("Akses ditolak. Cek email atau role Anda.");
-        setLoading(false);
-        return;
+        setError("Akses ditolak. Cek email atau role Anda.")
+        setLoading(false)
+        return
       }
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.Message && data.Message.includes("Successfuly Login")) {
         // Store tokens in localStorage
-        localStorage.setItem("access_token", data.Data.access_token);
-        localStorage.setItem("refresh_token", data.Data.refresh_token);
+        localStorage.setItem("access_token", data.Data.access_token)
+        localStorage.setItem("refresh_token", data.Data.refresh_token)
 
         // Store user data
         localStorage.setItem(
@@ -190,38 +190,38 @@ export default function Login() {
             nama: data.Data.nama,
             role: data.Data.role,
             jabatan: data.Data.jabatan,
-          })
-        );
+          }),
+        )
       }
       // Redirect based on role
       if (role === "guru") {
-        navigate("/guru", { replace: true });
+        navigate("/guru", { replace: true })
       } else {
-        navigate("/", { replace: true });
+        navigate("/", { replace: true })
       }
     } catch (error) {
-      console.error("Login error:", error);
-      setError("Login gagal, cek email dan role!");
+      console.error("Login error:", error)
+      setError("Login gagal, cek email dan role!")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const signInWithGoogle = () => {
-    setLoading(true);
+    setLoading(true)
     signInWithPopup(auth, provider)
       .then((result) => {
-        const userEmail = result.user.email;
-        setEmail(userEmail);
+        const userEmail = result.user.email
+        setEmail(userEmail)
       })
       .catch((error) => {
-        console.warn("Popup login gagal, coba redirect...", error);
-        signInWithRedirect(auth, provider);
+        console.warn("Popup login gagal, coba redirect...", error)
+        signInWithRedirect(auth, provider)
       })
       .finally(() => {
-        setLoading(false);
-      });
-  };
+        setLoading(false)
+      })
+  }
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-indigo-100 to-white">
@@ -356,5 +356,5 @@ export default function Login() {
         </div>
       </div>
     </div>
-  );
+  )
 }

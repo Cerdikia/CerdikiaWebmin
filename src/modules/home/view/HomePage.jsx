@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
 import {
   Users,
   BookOpen,
@@ -8,7 +8,7 @@ import {
   CheckCircle,
   ArrowUpRight,
   BarChart3,
-} from "lucide-react";
+} from "lucide-react"
 
 export default function HomePage() {
   const [stats, setStats] = useState({
@@ -16,20 +16,20 @@ export default function HomePage() {
     mapel: 0,
     modules: 0,
     soal: 0,
-  });
-  const [recentActivity, setRecentActivity] = useState([]);
-  const [loading, setLoading] = useState(true);
+  })
+  const [recentActivity, setRecentActivity] = useState([])
+  const [loading, setLoading] = useState(true)
 
   // Mock data for demonstration
   useEffect(() => {
-    console.log(`Bearer ${localStorage.getItem("access_token")}`);
+    console.log(`Bearer ${localStorage.getItem("access_token")}`)
 
     const fetchData = async () => {
       try {
         // In a real app, you would fetch this data from your API
         // For now, we'll use mock data
 
-        setLoading(true);
+        setLoading(true)
         // =============== Fetch User Data ========================
         // Fetch real user data from the API
         const getAllUsersResponse = await fetch(
@@ -38,14 +38,14 @@ export default function HomePage() {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
-          }
-        );
+          },
+        )
 
         if (!getAllUsersResponse.ok) {
-          throw new Error("Failed to fetch data");
+          throw new Error("Failed to fetch data")
         }
 
-        const userData = await getAllUsersResponse.json();
+        const userData = await getAllUsersResponse.json()
         // =============== Fetch User Data ========================
         // =============== Fetch Mapel Data ========================
         // Fetch real user data from the API
@@ -55,25 +55,25 @@ export default function HomePage() {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
-          }
-        );
+          },
+        )
 
         if (!getAllMapelResponse.ok) {
-          throw new Error("Failed to fetch data");
+          throw new Error("Failed to fetch data")
         }
 
-        const mapelData = await getAllMapelResponse.json();
+        const mapelData = await getAllMapelResponse.json()
         // =============== Fetch User Data ========================
 
         // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000))
 
         setStats({
           users: userData.Data ? userData.Data.length : 0,
           mapel: mapelData.Data ? mapelData.Data.length : 0,
           modules: 24,
           soal: 156,
-        });
+        })
 
         setRecentActivity([
           {
@@ -100,16 +100,16 @@ export default function HomePage() {
             title: "Mata pelajaran IPA ditambahkan",
             time: "2 hari yang lalu",
           },
-        ]);
+        ])
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        console.error("Error fetching dashboard data:", error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   const statCards = [
     {
@@ -136,14 +136,14 @@ export default function HomePage() {
       icon: CheckCircle,
       color: "bg-amber-500",
     },
-  ];
+  ]
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
-    );
+    )
   }
 
   return (
@@ -243,5 +243,5 @@ export default function HomePage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
