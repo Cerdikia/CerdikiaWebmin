@@ -7,6 +7,7 @@ import { Book, Plus, Search, RefreshCw, Pencil, Trash2, ArrowLeft, FileText } fr
 import RefreshToken from "../../../components/_common_/RefreshToken"
 import FetchData from "../../../components/_common_/FetchData"
 import ModuleModal from "../../../components/ModulePage/ModuleModal"
+import DeleteModuleModal from "../../../components/ModulePage/DeleteModuleModal"
 
 export default function ListModule() {
   const { id } = useParams()
@@ -16,6 +17,8 @@ export default function ListModule() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [editModule, setEditModule] = useState(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [deleteModule, setDeleteModule] = useState(null)
   const [kelasList, setKelasList] = useState([])
   const [mapelDetail, setMapelDetail] = useState({})
   const [searchTerm, setSearchTerm] = useState("")
@@ -135,29 +138,36 @@ export default function ListModule() {
     setIsModalOpen(true)
   }
 
-  const handleDeleteClick = async (e, id) => {
+  const handleDeleteClick = (e, module) => {
     e.stopPropagation()
+    setDeleteModule(module)
+    setIsDeleteModalOpen(true)
+  }
 
-    if (window.confirm("Apakah Anda yakin ingin menghapus modul ini?")) {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/genericModules/${id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        })
+  const handleConfirmDelete = async () => {
+    if (!deleteModule) return
 
-        if (response.ok) {
-          // Remove the deleted item from the state
-          setModules(modules.filter((module) => module.id_module !== id))
-          alert("Modul berhasil dihapus")
-        } else {
-          alert("Gagal menghapus modul")
-        }
-      } catch (error) {
-        console.error("Error deleting module:", error)
-        alert("Terjadi kesalahan saat menghapus modul")
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/genericModules/${deleteModule.id_module}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      })
+
+      if (response.ok) {
+        // Remove the deleted item from the state
+        setModules(modules.filter((module) => module.id_module !== deleteModule.id_module))
+        alert("Modul berhasil dihapus")
+      } else {
+        alert("Gagal menghapus modul")
       }
+    } catch (error) {
+      console.error("Error deleting module:", error)
+      alert("Terjadi kesalahan saat menghapus modul")
+    } finally {
+      setIsDeleteModalOpen(false)
+      setDeleteModule(null)
     }
   }
 
@@ -296,7 +306,7 @@ export default function ListModule() {
                           </button>
                           <button
                             className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50"
-                            onClick={(e) => handleDeleteClick(e, module.id_module)}
+                            onClick={(e) => handleDeleteClick(e, module)}
                           >
                             <Trash2 size={16} />
                           </button>
@@ -342,6 +352,16 @@ export default function ListModule() {
         fields={["id_kelas", "id_mapel", "module", "module_judul", "module_deskripsi"]}
         detailData={mapelDetail}
         editData={editModule}
+      />
+
+      <DeleteModuleModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false)
+          setDeleteModule(null)
+        }}
+        onConfirm={handleConfirmDelete}
+        module={deleteModule}
       />
     </div>
   )

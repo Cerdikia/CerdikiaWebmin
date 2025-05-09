@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useLocation, useNavigate } from "react-router-dom"
-import { ArrowLeft, Save, Loader2, User, Mail, Phone, MapPin, AlertCircle, CheckCircle } from "lucide-react"
+import { ArrowLeft, Save, Loader2 } from "lucide-react"
 import RefreshToken from "../../../components/_common_/RefreshToken"
 
 export default function UserForm() {
@@ -18,12 +18,11 @@ export default function UserForm() {
   const [formData, setFormData] = useState({
     email: "",
     nama: "",
-    no_telp: "",
-    alamat: "",
-    image_profile: "",
   })
 
   const [role, setRole] = useState(roleFromState || "guru")
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
@@ -34,10 +33,13 @@ export default function UserForm() {
       setFormData({
         email: userFromState.email || "",
         nama: userFromState.nama || "",
-        no_telp: userFromState.no_telp || "",
-        alamat: userFromState.alamat || "",
-        image_profile: userFromState.image_profile || "",
       })
+
+      // Set image preview if there's an existing image_profile
+      if (userFromState.image_profile) {
+        setImagePreview(userFromState.image_profile)
+      }
+
       return
     }
 
@@ -52,7 +54,7 @@ export default function UserForm() {
     setError(null)
 
     try {
-      let response = await fetch(`${import.meta.env.VITE_API_URL}/getDataActor/${role}/${id}`, {
+      let response = await fetch(`${import.meta.env.VITE_API_URL}/actor/${role}/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -61,7 +63,7 @@ export default function UserForm() {
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(`${import.meta.env.VITE_API_URL}/getDataActor/${role}/${id}`, {
+          response = await fetch(`${import.meta.env.VITE_API_URL}/actor/${role}/${id}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
@@ -78,10 +80,12 @@ export default function UserForm() {
         setFormData({
           email: data.Data.email || "",
           nama: data.Data.nama || "",
-          no_telp: data.Data.no_telp || "",
-          alamat: data.Data.alamat || "",
-          image_profile: data.Data.image_profile || "",
         })
+
+        // Set image preview if there's an existing image_profile
+        if (data.Data.image_profile) {
+          setImagePreview(data.Data.image_profile)
+        }
       } else {
         setError("User not found or error fetching data")
       }
@@ -105,6 +109,46 @@ export default function UserForm() {
     setRole(e.target.value)
   }
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setImageFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  // Function to upload image
+  const uploadImage = async (email) => {
+    if (!imageFile) return true // Skip if no image to upload
+
+    try {
+      const formDataImage = new FormData()
+      formDataImage.append("image", imageFile)
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/patchImageProfile/${role}/${email}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: formDataImage,
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image")
+      }
+
+      return true
+    } catch (error) {
+      console.error("Error uploading image:", error)
+      setError("User data saved, but failed to upload image. Please try again.")
+      return false
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -116,7 +160,7 @@ export default function UserForm() {
 
       if (isEditMode) {
         // Update existing user
-        url = `${import.meta.env.VITE_API_URL}/actor/${role}`
+        url = `${import.meta.env.VITE_API_URL}/editDataUser/${role}`
         method = "PUT"
       } else {
         // Create new user
@@ -124,6 +168,7 @@ export default function UserForm() {
         method = "POST"
       }
 
+      // First, save the user data
       const response = await fetch(url, {
         method,
         headers: {
@@ -135,19 +180,28 @@ export default function UserForm() {
 
       const data = await response.json()
 
-      if (response.ok) {
-        setSuccess(isEditMode ? "User updated successfully!" : "User created successfully!")
-
-        // Redirect after a short delay
-        setTimeout(() => {
-          navigate("/users")
-        }, 1500)
-      } else {
-        setError(data.message || "An error occurred")
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to save user data")
       }
+
+      // If user data was saved successfully and we have an image to upload, do that next
+      if (imageFile) {
+        const imageUploaded = await uploadImage(formData.email)
+        if (!imageUploaded) {
+          setSuccess("User data saved, but image upload failed.")
+          return
+        }
+      }
+
+      setSuccess(isEditMode ? "User updated successfully!" : "User created successfully!")
+
+      // Redirect after a short delay
+      setTimeout(() => {
+        navigate("/users")
+      }, 1500)
     } catch (error) {
       console.error("Error saving user:", error)
-      setError("Failed to save user. Please try again.")
+      setError(error.message || "Failed to save user. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -156,157 +210,140 @@ export default function UserForm() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex items-center mb-6">
-        <button
-          onClick={() => navigate("/users")}
-          className="mr-4 p-2 rounded-full hover:bg-gray-100"
-          aria-label="Back to users"
-        >
+        <button onClick={() => navigate("/users")} className="mr-4 p-2 rounded-full hover:bg-gray-100">
           <ArrowLeft size={20} />
         </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{isEditMode ? "Edit User" : "Create New User"}</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            {isEditMode ? "Update user information" : "Add a new user to the system"}
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold">{isEditMode ? "Edit User" : "Create New User"}</h1>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-md p-6">
         {error && (
-          <div className="p-4 bg-red-50 border-b border-red-100 flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
             <p className="text-red-700">{error}</p>
           </div>
         )}
 
         {success && (
-          <div className="p-4 bg-green-50 border-b border-green-100 flex items-start gap-3">
-            <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+          <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
             <p className="text-green-700">{success}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  disabled={isEditMode}
-                  className={`w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    isEditMode ? "bg-gray-50 text-gray-500" : ""
-                  }`}
-                  placeholder="user@example.com"
-                />
-              </div>
-              {isEditMode && <p className="text-xs text-gray-500">Email cannot be changed</p>}
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                disabled={isEditMode} // Email can't be changed in edit mode
+                className={`w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  isEditMode ? "bg-gray-100" : ""
+                }`}
+              />
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
                 Role <span className="text-red-500">*</span>
               </label>
               <select
                 id="role"
                 value={role}
                 onChange={handleRoleChange}
-                disabled={isEditMode}
-                className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                  isEditMode ? "bg-gray-50 text-gray-500" : ""
+                disabled={isEditMode} // Role can't be changed in edit mode
+                className={`w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  isEditMode ? "bg-gray-100" : ""
                 }`}
               >
                 <option value="guru">Guru</option>
                 <option value="admin">Admin</option>
                 <option value="kepalaSekolah">Kepala Sekolah</option>
               </select>
-              {isEditMode && <p className="text-xs text-gray-500">Role cannot be changed</p>}
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="nama" className="block text-sm font-medium text-gray-700">
+            <div>
+              <label htmlFor="nama" className="block text-sm font-medium text-gray-700 mb-1">
                 Name <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  id="nama"
-                  name="nama"
-                  value={formData.nama}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Full name"
-                />
-              </div>
+              <input
+                type="text"
+                id="nama"
+                name="nama"
+                value={formData.nama}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="no_telp" className="block text-sm font-medium text-gray-700">
-                Phone Number
+            <div>
+              <label htmlFor="image_profile" className="block text-sm font-medium text-gray-700 mb-1">
+                Profile Image
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  id="no_telp"
-                  name="no_telp"
-                  value={formData.no_telp}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="+62 812 3456 7890"
-                />
-              </div>
+              <input
+                type="file"
+                id="image_profile"
+                name="image_profile"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {isEditMode
+                  ? "Upload a new image to replace the current one"
+                  : "Select an image for your profile (optional)"}
+              </p>
             </div>
 
-            <div className="md:col-span-2 space-y-2">
-              <label htmlFor="alamat" className="block text-sm font-medium text-gray-700">
-                Address
-              </label>
-              <div className="relative">
-                <div className="absolute top-3 left-3 flex items-start pointer-events-none">
-                  <MapPin className="h-5 w-5 text-gray-400" />
+            {/* Image Preview */}
+            {imagePreview && (
+              <div className="md:col-span-2 flex justify-center">
+                <div className="relative">
+                  <img
+                    src={imagePreview || "/placeholder.svg"}
+                    alt="Profile Preview"
+                    className="w-32 h-32 object-cover rounded-full border-2 border-indigo-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImagePreview(null)
+                      setImageFile(null)
+                    }}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 transform translate-x-1/2 -translate-y-1/2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
                 </div>
-                <textarea
-                  id="alamat"
-                  name="alamat"
-                  value={formData.alamat}
-                  onChange={handleChange}
-                  rows="3"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Full address"
-                ></textarea>
               </div>
-            </div>
+            )}
           </div>
 
-          <div className="flex justify-end mt-8 pt-6 border-t border-gray-100">
+          <div className="flex justify-end">
             <button
               type="button"
               onClick={() => navigate("/users")}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 mr-3 hover:bg-gray-50 font-medium"
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 mr-2 hover:bg-gray-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center justify-center px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-indigo-400 font-medium"
+              className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-indigo-400"
             >
               {loading ? (
                 <>
