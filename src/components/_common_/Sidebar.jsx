@@ -13,6 +13,7 @@ import {
   Users,
   LogOut,
   ChevronDown,
+  BarChart
 } from "lucide-react"
 
 export default function Sidebar() {
@@ -70,6 +71,12 @@ export default function Sidebar() {
       path: "/mapel",
       label: "Mata Pelajaran",
       icon: Book,
+      roles: ["admin", "guru"],
+    },
+    {
+      path: "/scores",
+      label: "Student Scores",
+      icon: BarChart,
       roles: ["admin", "guru"],
     },
     {
