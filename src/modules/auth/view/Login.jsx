@@ -183,15 +183,17 @@ export default function Login() {
         localStorage.setItem("refresh_token", data.Data.refresh_token)
 
         // Store user data
-        localStorage.setItem(
-          "user_data",
-          JSON.stringify({
-            email: data.Data.email,
-            nama: data.Data.nama,
-            role: data.Data.role,
-            jabatan: data.Data.jabatan,
-          }),
-        )
+        // localStorage.setItem(
+        //   "user_data",
+        //   JSON.stringify({
+        //     email: data.Data.email,
+        //     nama: data.Data.nama,
+        //     role: data.Data.role,
+        //     imageProfile: data.Data.image_profile,
+        //     jabatan: data.Data.jabatan,
+        //   }),
+        // )
+        localStorage.setItem("user_data", JSON.stringify(data.Data))
       }
       // Redirect based on role
       if (role === "guru") {
