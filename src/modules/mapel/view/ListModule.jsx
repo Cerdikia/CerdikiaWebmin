@@ -36,12 +36,12 @@ export default function ListModule() {
 
   // Store mapel ID in localStorage
   useEffect(() => {
-    if (id) {
-      localStorage.setItem("idMapel", id)
-    }
+    // if (id) {
+    //   localStorage.setItem("idMapel", id)
+    // }
   }, [id])
 
-  const storedId = localStorage.getItem("idMapel") || id
+  const storedId = id
 
   useEffect(() => {
     setIsAdmin(userData?.role === "admin")
@@ -162,16 +162,23 @@ export default function ListModule() {
     if (!deleteModule) return
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/genericModules/${deleteModule.id_module}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/genericModules/${deleteModule.id_module}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         },
-      })
+      )
 
       if (response.ok) {
         // Remove the deleted item from the state
-        setModules(modules.filter((module) => module.id_module !== deleteModule.id_module))
+        setModules(
+          modules.filter(
+            (module) => module.id_module !== deleteModule.id_module,
+          ),
+        )
         alert("Modul berhasil dihapus")
       } else {
         alert("Gagal menghapus modul")
@@ -336,7 +343,6 @@ export default function ListModule() {
                           </button>
                           <button
                             className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50"
-                            
                             onClick={(e) => handleDeleteClick(e, module)}
                           >
                             <Trash2 size={16} />
