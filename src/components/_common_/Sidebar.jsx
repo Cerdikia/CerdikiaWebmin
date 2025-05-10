@@ -13,7 +13,8 @@ import {
   Users,
   LogOut,
   ChevronDown,
-  BarChart
+  BarChart,
+  Gift,
 } from "lucide-react"
 
 export default function Sidebar() {
@@ -104,6 +105,15 @@ export default function Sidebar() {
       label: "Pengguna",
       icon: Users,
       roles: ["admin", "guru"],
+    },
+    {
+      label: "Gift Management",
+      icon: Gift,
+      submenu: [
+        { path: "/gifts", label: "Gift List" },
+        { path: "/gifts/upload", label: "Upload Gift" },
+      ],
+      roles: ["admin"],
     },
   ]
 
