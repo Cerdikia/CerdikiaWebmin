@@ -26,6 +26,11 @@ export default function Sidebar() {
   useEffect(() => {
     const data = localStorage.getItem("user_data")
     const jsonData = JSON.parse(data)
+
+    if (jsonData === null) {
+      handleLogout()
+    }
+
     setUserRole(jsonData.role)
 
     // console.log(userData)
@@ -64,7 +69,7 @@ export default function Sidebar() {
       path: "/",
       label: "Dashboard",
       icon: Home,
-      roles: ["admin", "guru"],
+      roles: ["admin", "guru", "kepalaSekolah"],
     },
     {
       path: "/mapel",
@@ -85,7 +90,7 @@ export default function Sidebar() {
       path: "/blog",
       label: "Blog",
       icon: FileText,
-      roles: [],
+      roles: ["admin", "guru"],
     },
     {
       path: "/users",
