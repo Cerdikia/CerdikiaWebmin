@@ -212,7 +212,7 @@ export default function HomePage() {
         // =============== Fetch User Data ========================
 
         // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        // await new Promise((resolve) => setTimeout(resolve, 1000))
 
         setStats({
           users: userData.data ? userData.data.total_users : 0,

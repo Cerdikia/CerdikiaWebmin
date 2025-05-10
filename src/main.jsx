@@ -9,23 +9,24 @@
 //   </StrictMode>,
 // )
 
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { RouterProvider } from "react-router-dom";
-import { autoLoadRoute } from "./autoLoadRoute";
-import "./index.css";
+import React from "react"
+import ReactDOM from "react-dom/client"
+import { RouterProvider } from "react-router-dom"
+import { autoLoadRoute } from "./autoLoadRoute"
+import "./index.css"
 
 async function init() {
-  const router = await autoLoadRoute();
+  const router = await autoLoadRoute()
 
   ReactDOM.createRoot(document.getElementById("root")).render(
-    <React.StrictMode>
-      <RouterProvider router={router} />
-    </React.StrictMode>
-  );
+    // <React.StrictMode>
+    //   <RouterProvider router={router} />
+    // </React.StrictMode>
+    <RouterProvider router={router} />,
+  )
   // ReactDOM.createRoot(document.getElementById("root")).render(
   //   <RouterProvider router={router} />
   // );
 }
 
-init();
+init()

@@ -316,6 +316,7 @@ export default function Login() {
               >
                 <option value="">-- Pilih Role --</option>
                 <option value="guru">Guru</option>
+                {/* <option value="kepalaSekolah">Kepala Sekolah</option> */}
                 <option value="kepalaSekolah">Kepala Sekolah</option>
                 <option value="admin">Admin</option>
               </select>

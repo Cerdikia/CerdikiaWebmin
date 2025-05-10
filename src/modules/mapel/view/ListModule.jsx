@@ -3,7 +3,16 @@
 import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Book, Plus, Search, RefreshCw, Pencil, Trash2, ArrowLeft, FileText } from "lucide-react"
+import {
+  Book,
+  Plus,
+  Search,
+  RefreshCw,
+  Pencil,
+  Trash2,
+  ArrowLeft,
+  FileText,
+} from "lucide-react"
 import RefreshToken from "../../../components/_common_/RefreshToken"
 import FetchData from "../../../components/_common_/FetchData"
 import ModuleModal from "../../../components/ModulePage/ModuleModal"
@@ -37,7 +46,6 @@ export default function ListModule() {
   useEffect(() => {
     setIsAdmin(userData?.role === "admin")
   }, [userData])
-
 
   const handleSaveModule = (moduleData) => {
     console.log("Module baru/update:", moduleData)
@@ -78,20 +86,26 @@ export default function ListModule() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      let response = await fetch(`${import.meta.env.VITE_API_URL}/genericModules?id_mapel=${storedId}&finished=0`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      let response = await fetch(
+        `${import.meta.env.VITE_API_URL}/genericModules?id_mapel=${storedId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         },
-      })
+      )
 
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(`${import.meta.env.VITE_API_URL}/genericModules?id_mapel=${storedId}&finished=0`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          response = await fetch(
+            `${import.meta.env.VITE_API_URL}/genericModules?id_mapel=${storedId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+              },
             },
-          })
+          )
         } else {
           window.location.href = "/login"
           return
@@ -171,16 +185,16 @@ export default function ListModule() {
     }
   }
 
-    // Check if user is admin
-    if (!isAdmin) {
-      return (
-        <div className="p-8 bg-red-50 rounded-xl border border-red-200">
-          <h2 className="text-xl font-semibold text-red-700">Akses Ditolak</h2>
-          <p className="mt-2 text-red-600">Halaman ini hanya untuk Admin.</p>
-        </div>
-      )
-    }
-    
+  // Check if user is admin
+  if (!isAdmin) {
+    return (
+      <div className="p-8 bg-red-50 rounded-xl border border-red-200">
+        <h2 className="text-xl font-semibold text-red-700">Akses Ditolak</h2>
+        <p className="mt-2 text-red-600">Halaman ini hanya untuk Admin.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto p-4">
       {/* Header with back button and title */}
@@ -195,7 +209,9 @@ export default function ListModule() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Daftar Modul</h1>
           <p className="text-gray-500 text-sm mt-1">
-            {mapelDetail.text ? `Mata Pelajaran: ${mapelDetail.text}` : "Kelola modul pembelajaran"}
+            {mapelDetail.text
+              ? `Mata Pelajaran: ${mapelDetail.text}`
+              : "Kelola modul pembelajaran"}
           </p>
         </div>
       </div>
@@ -206,7 +222,10 @@ export default function ListModule() {
         <div className="p-6 border-b border-gray-100">
           <div className="flex flex-col md:flex-row gap-4 justify-between">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Cari modul..."
@@ -283,21 +302,32 @@ export default function ListModule() {
                           {module.kelas}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{module.id_module}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{module.module}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {module.id_module}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {module.module}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center">
                             <FileText className="h-5 w-5 text-indigo-600" />
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{module.module_judul}</div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {module.module_judul}
+                            </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{module.module_deskripsi}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {module.module_deskripsi}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
+                        <div
+                          className="flex justify-end space-x-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <button
                             className="text-indigo-600 hover:text-indigo-900 p-1 rounded-full hover:bg-indigo-50"
                             onClick={(e) => handleEditClick(e, module)}
@@ -306,6 +336,7 @@ export default function ListModule() {
                           </button>
                           <button
                             className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50"
+                            
                             onClick={(e) => handleDeleteClick(e, module)}
                           >
                             <Trash2 size={16} />
@@ -316,11 +347,18 @@ export default function ListModule() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="px-6 py-12 text-center text-sm text-gray-500">
+                    <td
+                      colSpan="6"
+                      className="px-6 py-12 text-center text-sm text-gray-500"
+                    >
                       <div className="flex flex-col items-center">
                         <Book className="w-12 h-12 text-gray-300 mb-2" />
-                        <p className="text-gray-500 mb-1">Tidak ada modul ditemukan</p>
-                        <p className="text-gray-400 text-xs">Tambahkan modul baru untuk mata pelajaran ini</p>
+                        <p className="text-gray-500 mb-1">
+                          Tidak ada modul ditemukan
+                        </p>
+                        <p className="text-gray-400 text-xs">
+                          Tambahkan modul baru untuk mata pelajaran ini
+                        </p>
                       </div>
                     </td>
                   </tr>
@@ -333,13 +371,18 @@ export default function ListModule() {
         {/* Footer with pagination */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            Menampilkan <span className="font-medium">{filteredModules.length}</span> modul
+            Menampilkan{" "}
+            <span className="font-medium">{filteredModules.length}</span> modul
           </div>
         </div>
       </div>
 
       <ModuleModal
-        endpoint={isEditMode ? `genericModules/${editModule?.id_module}` : "genericModules"}
+        endpoint={
+          isEditMode
+            ? `genericModules/${editModule?.id_module}`
+            : "genericModules"
+        }
         method={isEditMode ? "PUT" : "POST"}
         isOpen={isModalOpen}
         onClose={() => {
@@ -349,7 +392,13 @@ export default function ListModule() {
         }}
         onSave={handleSaveModule}
         kelasOptions={kelasList}
-        fields={["id_kelas", "id_mapel", "module", "module_judul", "module_deskripsi"]}
+        fields={[
+          "id_kelas",
+          "id_mapel",
+          "module",
+          "module_judul",
+          "module_deskripsi",
+        ]}
         detailData={mapelDetail}
         editData={editModule}
       />
