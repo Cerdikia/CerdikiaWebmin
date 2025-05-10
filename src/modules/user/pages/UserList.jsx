@@ -93,7 +93,7 @@ export default function UserList() {
     if (!userToDelete) return
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/actor`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/deleteDataUser`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

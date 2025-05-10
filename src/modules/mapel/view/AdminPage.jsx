@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { Book, Plus, Search, RefreshCw, Pencil, Trash2, ChevronDown, MoreHorizontal } from "lucide-react"
 import RefreshToken from "../../../components/_common_/RefreshToken"
 import MapelModal from "../../../components/MapelPage/MapelModal"
+import DeleteMapelModal from "../../../components/MapelPage/DeleteMapelModal"
 
 export default function AdminPage() {
   const navigate = useNavigate()
@@ -14,6 +15,8 @@ export default function AdminPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [editMapel, setEditMapel] = useState(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [deleteMapel, setDeleteMapel] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedKelas, setSelectedKelas] = useState("all")
   const [kelasList, setKelasList] = useState([])
@@ -174,30 +177,37 @@ export default function AdminPage() {
     setIsModalOpen(true)
   }
 
-  const handleDeleteClick = async (e, id) => {
+  const handleDeleteClick = (e, mapel) => {
     e.stopPropagation()
+    setDeleteMapel(mapel)
+    setIsDeleteModalOpen(true)
+  }
 
-    if (window.confirm("Apakah Anda yakin ingin menghapus mata pelajaran ini?")) {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/genericMapels/${id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        })
+  const handleConfirmDelete = async () => {
+    if (!deleteMapel) return
 
-        if (response.ok) {
-          // Remove the deleted item from the state
-          setMapel(mapel.filter((item) => item.id_mapel !== id))
-          setFilteredMapel(filteredMapel.filter((item) => item.id_mapel !== id))
-          alert("Mata pelajaran berhasil dihapus")
-        } else {
-          alert("Gagal menghapus mata pelajaran")
-        }
-      } catch (error) {
-        console.error("Error deleting mapel:", error)
-        alert("Terjadi kesalahan saat menghapus mata pelajaran")
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/genericMapels/${deleteMapel.id_mapel}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      })
+
+      if (response.ok) {
+        // Remove the deleted item from the state
+        setMapel(mapel.filter((item) => item.id_mapel !== deleteMapel.id_mapel))
+        setFilteredMapel(filteredMapel.filter((item) => item.id_mapel !== deleteMapel.id_mapel))
+        alert("Mata pelajaran berhasil dihapus")
+      } else {
+        alert("Gagal menghapus mata pelajaran")
       }
+    } catch (error) {
+      console.error("Error deleting mapel:", error)
+      alert("Terjadi kesalahan saat menghapus mata pelajaran")
+    } finally {
+      setIsDeleteModalOpen(false)
+      setDeleteMapel(null)
     }
   }
 
@@ -377,7 +387,7 @@ export default function AdminPage() {
                           </button>
                           <button
                             className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50"
-                            onClick={(e) => handleDeleteClick(e, row.id_mapel)}
+                            onClick={(e) => handleDeleteClick(e, row)}
                           >
                             <Trash2 size={16} />
                           </button>
@@ -440,6 +450,16 @@ export default function AdminPage() {
         fields={["mapel"]}
         editData={editMapel}
         kelasList={kelasList}
+      />
+
+      <DeleteMapelModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false)
+          setDeleteMapel(null)
+        }}
+        onConfirm={handleConfirmDelete}
+        mapel={deleteMapel}
       />
     </div>
   )
