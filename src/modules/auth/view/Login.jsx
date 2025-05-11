@@ -236,7 +236,7 @@ export default function Login() {
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="relative z-20 flex flex-col justify-center items-start p-12 text-white h-full">
-          <h1 className="text-4xl font-bold mb-4">Cerdikia Webmin</h1>
+          <h1 className="text-4xl font-bold mb-4">LMS SD Negeri 8 Metro Pusat</h1>
           <p className="text-xl opacity-90 max-w-md">
             Platform manajemen pembelajaran untuk meningkatkan kualitas
             pendidikan

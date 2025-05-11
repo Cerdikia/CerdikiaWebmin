@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { ArrowLeft, Edit, Trash2 } from "lucide-react"
 import RefreshToken from "../../../components/_common_/RefreshToken"
 import DeleteUserModal from "../components/DeleteUserModal"
@@ -9,9 +9,14 @@ import DeleteUserModal from "../components/DeleteUserModal"
 export default function UserDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Get role from location state or default to "guru"
+  const initialRole = location.state?.role || "guru"
+  const userDataFromState = location.state?.userData || null
 
   const [user, setUser] = useState(null)
-  const [role, setRole] = useState("guru") // Default role
+  const [role, setRole] = useState(initialRole)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -20,12 +25,13 @@ export default function UserDetail() {
     fetchUserData()
   }, [id, role])
 
-  // Update the fetchUserData function to use the correct endpoint
+  // Update the fetchUserData function to handle array responses
   const fetchUserData = async () => {
     setLoading(true)
     setError(null)
 
     try {
+      // First, try to get the user with the current role
       let response = await fetch(`${import.meta.env.VITE_API_URL}/getDataActor/${role}/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -47,30 +53,88 @@ export default function UserDetail() {
       }
 
       const data = await response.json()
+      console.log("API Response:", data) // Debug log
 
-      if (data.Message === "Success" && data.Data) {
-        setUser(data.Data)
-      } else {
-        // If not found with current role, try other roles
+      // Check if data exists and handle both array and object responses
+      if (data.Message === "Success" || data.Message === "Data retrieved successfully") {
+        // Handle case where Data is an array
+        if (Array.isArray(data.Data) && data.Data.length > 0) {
+          const userData = data.Data[0]
+          // If image_profile is missing or null, use the one from state
+          if ((!userData.image_profile || userData.image_profile === "") && userDataFromState?.image_profile) {
+            userData.image_profile = userDataFromState.image_profile
+          }
+          setUser(userData)
+          return
+        }
+        // Handle case where Data is an object
+        else if (data.Data && typeof data.Data === "object" && data.Data.email) {
+          const userData = data.Data
+          // If image_profile is missing or null, use the one from state
+          if ((!userData.image_profile || userData.image_profile === "") && userDataFromState?.image_profile) {
+            userData.image_profile = userDataFromState.image_profile
+          }
+          setUser(userData)
+          return
+        }
+      }
+
+      // If we get here, we didn't find a user with the current role
+      // Try other roles if we started with the role from state
+      if (role === initialRole) {
         const roles = ["guru", "admin", "kepalaSekolah"].filter((r) => r !== role)
+        let userFound = false
 
         for (const newRole of roles) {
-          response = await fetch(`${import.meta.env.VITE_API_URL}/getDataActor/${newRole}/${id}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-            },
-          })
+          try {
+            console.log(`Trying role: ${newRole}`) // Debug log
+            const altResponse = await fetch(`${import.meta.env.VITE_API_URL}/getDataActor/${newRole}/${id}`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+              },
+            })
 
-          const newData = await response.json()
+            if (altResponse.ok) {
+              const altData = await altResponse.json()
+              console.log(`Response for role ${newRole}:`, altData) // Debug log
 
-          if (newData.Message === "Success" && newData.Data) {
-            setUser(newData.Data)
-            setRole(newRole)
-            return
+              if (altData.Message === "Success" || altData.Message === "Data retrieved successfully") {
+                // Handle array response
+                if (Array.isArray(altData.Data) && altData.Data.length > 0) {
+                  const userData = altData.Data[0]
+                  // If image_profile is missing or null, use the one from state
+                  if ((!userData.image_profile || userData.image_profile === "") && userDataFromState?.image_profile) {
+                    userData.image_profile = userDataFromState.image_profile
+                  }
+                  setUser(userData)
+                  setRole(newRole)
+                  userFound = true
+                  break
+                }
+                // Handle object response
+                else if (altData.Data && typeof altData.Data === "object" && altData.Data.email) {
+                  const userData = altData.Data
+                  // If image_profile is missing or null, use the one from state
+                  if ((!userData.image_profile || userData.image_profile === "") && userDataFromState?.image_profile) {
+                    userData.image_profile = userDataFromState.image_profile
+                  }
+                  setUser(userData)
+                  setRole(newRole)
+                  userFound = true
+                  break
+                }
+              }
+            }
+          } catch (err) {
+            console.error(`Error trying role ${newRole}:`, err)
           }
         }
 
-        setError("User not found")
+        if (!userFound) {
+          setError("User not found. Please check the email address and try again.")
+        }
+      } else {
+        setError("User not found with the specified role.")
       }
     } catch (error) {
       console.error("Error fetching user:", error)
@@ -86,7 +150,7 @@ export default function UserDetail() {
 
   const handleDeleteConfirm = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/actor`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/deleteDataUser`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -204,11 +268,22 @@ export default function UserDetail() {
                 <p className="mt-1 text-lg capitalize">{role}</p>
               </div>
 
-              {/* Additional fields can be added here based on your user model */}
-              {user.created_at && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Name</h3>
+                <p className="mt-1 text-lg">{user.nama || "Not specified"}</p>
+              </div>
+
+              {user.jabatan && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Position</h3>
+                  <p className="mt-1 text-lg">{user.jabatan}</p>
+                </div>
+              )}
+
+              {user.date_created && (
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Created At</h3>
-                  <p className="mt-1 text-lg">{new Date(user.created_at).toLocaleDateString()}</p>
+                  <p className="mt-1 text-lg">{new Date(user.date_created).toLocaleDateString()}</p>
                 </div>
               )}
 
@@ -218,6 +293,15 @@ export default function UserDetail() {
                   <p className="mt-1 text-lg">{new Date(user.updated_at).toLocaleDateString()}</p>
                 </div>
               )}
+            </div>
+
+            {/* Activity section */}
+            <div className="mt-8">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <p className="text-gray-500 text-center py-4">No recent activity found</p>
+                {/* Activity items would go here */}
+              </div>
             </div>
           </div>
         </div>

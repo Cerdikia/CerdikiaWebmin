@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Pencil, Trash2, Search, RefreshCw, Filter, UserPlus, Users, ChevronDown, MoreHorizontal } from "lucide-react"
+import { Pencil, Trash2, Search, RefreshCw, UserPlus, Users, ChevronDown, MoreHorizontal, Eye } from "lucide-react"
 import RefreshToken from "../../../components/_common_/RefreshToken"
 import DeleteUserModal from "../components/DeleteUserModal"
 
@@ -22,7 +22,9 @@ export default function UserList() {
     total: 0,
   })
 
-  // Update the fetchUsers function to use the correct endpoint and handle the response structure
+  // Remove the code that checks for "kepala sekolah" by jabatan
+  // Replace the fetchUsers function with this simplified version
+
   const fetchUsers = async () => {
     setLoading(true)
     setError(null)
@@ -51,15 +53,16 @@ export default function UserList() {
       const data = await response.json()
 
       if (data.Message === "Data retrieved successfully" && data.Data) {
-        // Store all users and filter by role in the UI
-        setUsers(data.Data)
+        // Store all users - no need to check for kepala sekolah anymore
+        const allUsers = data.Data
+        setUsers(allUsers)
 
         // Calculate stats
         const stats = {
-          guru: data.Data.filter((user) => user.role === "guru").length,
-          admin: data.Data.filter((user) => user.role === "admin").length,
-          kepalaSekolah: data.Data.filter((user) => user.role === "kepalaSekolah").length,
-          total: data.Data.length,
+          guru: allUsers.filter((user) => user.role === "guru").length,
+          admin: allUsers.filter((user) => user.role === "admin").length,
+          kepalaSekolah: allUsers.filter((user) => user.role === "kepalaSekolah").length,
+          total: allUsers.length,
         }
         setStats(stats)
       } else {
@@ -209,14 +212,23 @@ export default function UserList() {
               />
             </div>
 
+            {/* Replace the Filter button with a simple role filter dropdown */}
             <div className="flex gap-2">
               <div className="relative inline-block">
-                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                  <Filter size={18} />
-                  <span>Filter</span>
-                  <ChevronDown size={16} />
-                </button>
-                {/* Dropdown menu would go here */}
+                <select
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 appearance-none pr-8"
+                >
+                  <option value="guru">Guru</option>
+                  <option value="admin">Admin</option>
+                  <option value="kepalaSekolah">Kepala Sekolah</option>
+                  <option value="siswa">Siswa</option>
+                </select>
+                <ChevronDown
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+                  size={16}
+                />
               </div>
 
               <button
@@ -274,7 +286,15 @@ export default function UserList() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((user, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-50 cursor-pointer"
+                      onClick={() =>
+                        navigate(`/users/${encodeURIComponent(user.email)}`, {
+                          state: { role: user.role, userData: user },
+                        })
+                      }
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0">
@@ -303,23 +323,37 @@ export default function UserList() {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
                           <Link
+                            to={`/users/${encodeURIComponent(user.email)}`}
+                            state={{ role: user.role }}
+                            className="text-blue-600 hover:text-blue-900 p-1 rounded-full hover:bg-blue-50"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Eye size={16} />
+                          </Link>
+                          <Link
                             to={`/users/edit/${user.email}`}
                             state={{ user, role: user.role }}
                             className="text-indigo-600 hover:text-indigo-900 p-1 rounded-full hover:bg-indigo-50"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             <Pencil size={16} />
                           </Link>
                           <button
-                            onClick={() => handleDeleteClick(user)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteClick(user)
+                            }}
                             className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50"
                           >
                             <Trash2 size={16} />
                           </button>
                           <div className="relative inline-block">
-                            <button className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100">
+                            <button
+                              className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <MoreHorizontal size={16} />
                             </button>
-                            {/* Dropdown menu would go here */}
                           </div>
                         </div>
                       </td>
