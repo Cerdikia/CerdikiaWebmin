@@ -4,7 +4,18 @@ import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { signOut } from "firebase/auth"
 import { auth } from "../../firebase-config"
-import { Menu, X, Home, Book, FileText, Users, LogOut, ChevronDown, BarChart } from "lucide-react"
+import {
+  Menu,
+  X,
+  Home,
+  Book,
+  FileText,
+  Users,
+  LogOut,
+  ChevronDown,
+  BarChart,
+  Gift,
+} from "lucide-react"
 
 export default function Sidebar() {
   const location = useLocation()
@@ -92,6 +103,15 @@ export default function Sidebar() {
       label: "Pengguna",
       icon: Users,
       roles: ["admin", "guru"],
+    },
+    {
+      label: "Gift Management",
+      icon: Gift,
+      submenu: [
+        { path: "/gifts", label: "Gift List" },
+        { path: "/gifts/upload", label: "Upload Gift" },
+      ],
+      roles: ["admin"],
     },
   ]
 
