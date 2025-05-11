@@ -4,17 +4,7 @@ import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { signOut } from "firebase/auth"
 import { auth } from "../../firebase-config"
-import {
-  Menu,
-  X,
-  Home,
-  Book,
-  FileText,
-  Users,
-  LogOut,
-  ChevronDown,
-  BarChart
-} from "lucide-react"
+import { Menu, X, Home, Book, FileText, Users, LogOut, ChevronDown, BarChart } from "lucide-react"
 
 export default function Sidebar() {
   const location = useLocation()
@@ -27,11 +17,6 @@ export default function Sidebar() {
   useEffect(() => {
     const data = localStorage.getItem("user_data")
     const jsonData = JSON.parse(data)
-
-    if (jsonData === null) {
-      handleLogout()
-    }
-
     setUserRole(jsonData.role)
 
     // console.log(userData)
@@ -70,7 +55,7 @@ export default function Sidebar() {
       path: "/",
       label: "Dashboard",
       icon: Home,
-      roles: ["admin", "guru", "kepalaSekolah"],
+      roles: ["admin", "guru"],
     },
     {
       path: "/mapel",
@@ -79,9 +64,12 @@ export default function Sidebar() {
       roles: ["admin", "guru"],
     },
     {
-      path: "/scores",
-      label: "Student Scores",
+      label: "Student Performance",
       icon: BarChart,
+      submenu: [
+        { path: "/scores", label: "Student Scores" },
+        { path: "/rankings", label: "Student Rankings" },
+      ],
       roles: ["admin", "guru"],
     },
     // {
@@ -97,7 +85,7 @@ export default function Sidebar() {
     //   path: "/blog",
     //   label: "Blog",
     //   icon: FileText,
-    //   roles: ["admin", "guru"],
+    //   roles: [],
     // },
     {
       path: "/users",
@@ -156,12 +144,8 @@ export default function Sidebar() {
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {userData.email || "User"}
-                </p>
-                <p className="text-xs text-gray-500 capitalize">
-                  {userData.role || "User"}
-                </p>
+                <p className="text-sm font-medium text-gray-900 truncate">{userData.email || "User"}</p>
+                <p className="text-xs text-gray-500 capitalize">{userData.role || "User"}</p>
               </div>
             </div>
           </div>
@@ -181,9 +165,7 @@ export default function Sidebar() {
                         className="flex items-center justify-between w-full px-4 py-2.5 text-left text-sm font-medium rounded-lg hover:bg-gray-100"
                       >
                         <div className="flex items-center">
-                          {item.icon && (
-                            <item.icon className="w-5 h-5 mr-3 text-gray-500" />
-                          )}
+                          {item.icon && <item.icon className="w-5 h-5 mr-3 text-gray-500" />}
                           <span>{item.label}</span>
                         </div>
                         <ChevronDown
@@ -215,9 +197,7 @@ export default function Sidebar() {
                     <Link
                       to={item.path}
                       className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
-                        isActive(item.path)
-                          ? "bg-indigo-50 text-indigo-600"
-                          : "text-gray-700 hover:bg-gray-100"
+                        isActive(item.path) ? "bg-indigo-50 text-indigo-600" : "text-gray-700 hover:bg-gray-100"
                       }`}
                       onClick={() => setIsOpen(false)}
                     >
@@ -243,16 +223,11 @@ export default function Sidebar() {
 
       {/* Overlay for mobile */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
-          onClick={() => setIsOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden" onClick={() => setIsOpen(false)} />
       )}
 
       {/* Main content wrapper with padding for sidebar */}
-      <div className="lg:pl-72 min-h-screen transition-all duration-300">
-        {/* Your page content goes here */}
-      </div>
+      <div className="lg:pl-72 min-h-screen transition-all duration-300">{/* Your page content goes here */}</div>
     </>
   )
 }
