@@ -84,21 +84,21 @@ export default function Sidebar() {
       icon: BarChart,
       roles: ["admin", "guru"],
     },
-    {
-      label: "Manajemen Soal",
-      icon: FileText,
-      submenu: [
-        { path: "/list-soal", label: "Daftar Soal" },
-        { path: "/upload-soal", label: "Upload Soal" },
-      ],
-      roles: ["admin", "guru"],
-    },
-    {
-      path: "/blog",
-      label: "Blog",
-      icon: FileText,
-      roles: ["admin", "guru"],
-    },
+    // {
+    //   label: "Manajemen Soal",
+    //   icon: FileText,
+    //   submenu: [
+    //     { path: "/list-soal", label: "Daftar Soal" },
+    //     { path: "/upload-soal", label: "Upload Soal" },
+    //   ],
+    //   roles: ["admin", "guru"],
+    // },
+    // {
+    //   path: "/blog",
+    //   label: "Blog",
+    //   icon: FileText,
+    //   roles: ["admin", "guru"],
+    // },
     {
       path: "/users",
       label: "Pengguna",

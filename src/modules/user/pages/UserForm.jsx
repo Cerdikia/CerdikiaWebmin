@@ -105,10 +105,6 @@ export default function UserForm() {
     }))
   }
 
-  const handleRoleChange = (e) => {
-    setRole(e.target.value)
-  }
-
   const handleImageChange = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -156,32 +152,75 @@ export default function UserForm() {
     setSuccess(null)
 
     try {
-      let url, method
+      // Check if we're in edit mode and the role has changed
+      if (isEditMode && role !== roleFromState) {
+        // Call the changeUserRole endpoint
+        const roleChangeResponse = await fetch(`${import.meta.env.VITE_API_URL}/changeUserRole`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            old_role: roleFromState,
+            new_role: role,
+          }),
+        })
 
-      if (isEditMode) {
-        // Update existing user
-        url = `${import.meta.env.VITE_API_URL}/editDataUser/${role}`
-        method = "PUT"
-      } else {
-        // Create new user
-        url = `${import.meta.env.VITE_API_URL}/register/${role}`
-        method = "POST"
+        const roleChangeData = await roleChangeResponse.json()
+
+        if (!roleChangeResponse.ok) {
+          throw new Error(roleChangeData.message || "Failed to change user role")
+        }
+
+        setSuccess("User role changed successfully!")
+
+        // If only the role changed (name is the same), don't call editDataUser
+        const hasNameChanged = userFromState && userFromState.nama !== formData.nama
+
+        if (!hasNameChanged) {
+          // If only the role changed, we're done - redirect after a short delay
+          setTimeout(() => {
+            navigate("/users")
+          }, 1500)
+          return
+        }
       }
 
-      // First, save the user data
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-        body: JSON.stringify(formData),
-      })
+      // If we're here, either it's not edit mode, or the role didn't change, or name changed too
+      if (isEditMode) {
+        // Update existing user data (only if needed)
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/editDataUser/${roleFromState}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+          body: JSON.stringify(formData),
+        })
 
-      const data = await response.json()
+        const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to save user data")
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to save user data")
+        }
+      } else {
+        // Create new user
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/register/${role}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+          body: JSON.stringify(formData),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to save user data")
+        }
       }
 
       // If user data was saved successfully and we have an image to upload, do that next
@@ -256,15 +295,13 @@ export default function UserForm() {
               <select
                 id="role"
                 value={role}
-                onChange={handleRoleChange}
-                disabled={isEditMode} // Role can't be changed in edit mode
-                className={`w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                  isEditMode ? "bg-gray-100" : ""
-                }`}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="guru">Guru</option>
                 <option value="admin">Admin</option>
                 <option value="kepalaSekolah">Kepala Sekolah</option>
+                <option value="siswa">Siswa</option>
               </select>
             </div>
 
