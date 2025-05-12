@@ -145,29 +145,94 @@ export default function HomePage() {
   // Process logs data for chart
   const processChartData = () => {
     // Group logs by date
-    const groupedByDate = {}
+    // const groupedByDate = {}
+    // Group logs by date or hour depending on the period
+    const groupedData = {}
 
     chartData.forEach((log) => {
       // Extract date part only from created_at
-      const date = new Date(log.created_at).toLocaleDateString()
+      // const date = new Date(log.created_at).toLocaleDateString()
 
-      if (!groupedByDate[date]) {
-        groupedByDate[date] = 0
+      // if (!groupedByDate[date]) {
+      //   groupedByDate[date] = 0
+      // }
+      const date = new Date(log.created_at)
+
+      // For "today" period, group by hour
+      if (chartPeriod === "today") {
+        // Format hour as "HH:00"
+        const hour = date.getHours()
+        const hourLabel = `${hour.toString().padStart(2, "0")}:00`
+
+        if (!groupedData[hourLabel]) {
+          groupedData[hourLabel] = 0
+        }
+        groupedData[hourLabel]++
+      } else {
+        // For week and month periods, continue grouping by date
+        const dateStr = date.toLocaleDateString()
+        if (!groupedData[dateStr]) {
+          groupedData[dateStr] = 0
+        }
+        // groupedByDate[date]++
+        groupedData[dateStr]++
       }
-      groupedByDate[date]++
     })
 
     // Sort dates
-    const sortedDates = Object.keys(groupedByDate).sort(
-      (a, b) => new Date(a) - new Date(b),
-    )
+    // const sortedDates = Object.keys(groupedByDate).sort(
+    //   (a, b) => new Date(a) - new Date(b),
+    // )
+
+    // Sort the keys (hours or dates)
+    let sortedKeys
+    if (chartPeriod === "today") {
+      // For today, sort hours numerically (00:00 to 23:00)
+      sortedKeys = Object.keys(groupedData).sort((a, b) => {
+        return (
+          Number.parseInt(a.split(":")[0]) - Number.parseInt(b.split(":")[0])
+        )
+      })
+    } else {
+      // For week and month, sort dates chronologically
+      sortedKeys = Object.keys(groupedData).sort(
+        (a, b) => new Date(a) - new Date(b),
+      )
+    }
+
+    // Fill in missing hours for today's data to show complete 24-hour period
+    if (chartPeriod === "today") {
+      const filledData = {}
+      for (let i = 0; i < 24; i++) {
+        const hourLabel = `${i.toString().padStart(2, "0")}:00`
+        filledData[hourLabel] = groupedData[hourLabel] || 0
+      }
+      // Replace groupedData with the filled version
+      return {
+        labels: Object.keys(filledData).sort(),
+        datasets: [
+          {
+            label: "Aktivitas Pengguna per Jam",
+            data: Object.keys(filledData)
+              .sort()
+              .map((hour) => filledData[hour]),
+            borderColor: "rgb(79, 70, 229)",
+            backgroundColor: "rgba(79, 70, 229, 0.2)",
+            tension: 0.3,
+            fill: true,
+          },
+        ],
+      }
+    }
 
     return {
-      labels: sortedDates,
+      // labels: sortedDates,
+      labels: sortedKeys,
       datasets: [
         {
           label: "Aktivitas Pengguna",
-          data: sortedDates.map((date) => groupedByDate[date]),
+          // data: sortedDates.map((date) => groupedByDate[date]),
+          data: sortedKeys.map((key) => groupedData[key]),
           borderColor: "rgb(79, 70, 229)",
           backgroundColor: "rgba(79, 70, 229, 0.2)",
           tension: 0.3,
@@ -277,7 +342,14 @@ export default function HomePage() {
       },
       title: {
         display: true,
-        text: `Aktivitas Pengguna (${chartPeriod === "today" ? "Hari Ini" : chartPeriod === "week" ? "Minggu Ini" : "Bulan Ini"})`,
+        // text: `Aktivitas Pengguna (${chartPeriod === "today" ? "Hari Ini" : chartPeriod === "week" ? "Minggu Ini" : "Bulan Ini"})`,
+        text: `Aktivitas Pengguna (${
+          chartPeriod === "today"
+            ? "Hari Ini per Jam"
+            : chartPeriod === "week"
+              ? "Minggu Ini"
+              : "Bulan Ini"
+        })`,
       },
     },
     scales: {
@@ -285,6 +357,12 @@ export default function HomePage() {
         beginAtZero: true,
         ticks: {
           precision: 0, // Only show whole numbers
+        },
+      },
+      x: {
+        title: {
+          display: chartPeriod === "today",
+          text: chartPeriod === "today" ? "Jam" : "",
         },
       },
     },
