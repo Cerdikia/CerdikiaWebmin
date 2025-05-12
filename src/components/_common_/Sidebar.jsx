@@ -15,7 +15,10 @@ import {
   ChevronDown,
   BarChart,
   Gift,
+  UserCheck,
+  MessageCircle,
 } from "lucide-react"
+import FetchData from "./FetchData"
 
 export default function Sidebar() {
   const location = useLocation()
@@ -24,6 +27,7 @@ export default function Sidebar() {
   const [userData, setUserData] = useState(null)
   const [activeSubmenu, setActiveSubmenu] = useState(null)
   const [userRole, setUserRole] = useState(null)
+  const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     const data = localStorage.getItem("user_data")
@@ -41,6 +45,40 @@ export default function Sidebar() {
       setUserData(JSON.parse(data))
     }
   }, [])
+
+  // Fetch unread message count
+  const fetchUnreadCount = async () => {
+    try {
+      const token = localStorage.getItem("access_token")
+      const response = await FetchData({
+        url: `${import.meta.env.VITE_API_URL}/messages/unread/count/all`,
+        method: "GET",
+        token,
+      })
+
+      if (response && response.Data) {
+        setUnreadCount(response.Data.total_count || 0)
+      }
+    } catch (err) {
+      console.error("Error fetching unread count:", err)
+    }
+  }
+
+  // Fetch unread count on component mount and periodically
+  useEffect(() => {
+    fetchUnreadCount()
+
+    // Refresh unread count every minute
+    const intervalId = setInterval(fetchUnreadCount, 60000)
+
+    // Clean up interval on unmount
+    return () => clearInterval(intervalId)
+  }, [])
+
+  // Refresh unread count when location changes (user navigates)
+  useEffect(() => {
+    fetchUnreadCount()
+  }, [location.pathname])
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen)
@@ -115,9 +153,38 @@ export default function Sidebar() {
       ],
       roles: ["admin"],
     },
+    {
+      // path: "/student-verification",
+      // label: "Student Verification",
+      label: "Student Management",
+      icon: UserCheck,
+      submenu: [
+        { path: "/student-verification", label: "Verification" },
+        // { path: "/messages", label: "Messages" },
+        {
+          path: "/messages",
+          label: "Messages",
+          icon: MessageCircle,
+          badge: unreadCount > 0 ? unreadCount : null,
+        },
+      ],
+      badge: unreadCount > 0 ? unreadCount : null,
+      roles: ["admin"],
+    },
   ]
 
   const isActive = (path) => location.pathname === path
+
+  // Notification Badge Component
+  const NotificationBadge = ({ count }) => {
+    if (!count || count <= 0) return null
+
+    return (
+      <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">
+        {count > 99 ? "99+" : count}
+      </span>
+    )
+  }
 
   return (
     <>
@@ -150,13 +217,14 @@ export default function Sidebar() {
               })
             }
           >
-            <div
+            {/* <div
               className="flex items-center space-x-3"
               // onClick={() =>
               //   // navigate(`/users/edit/${encodeURIComponent(userData.email)}`)
               //   navigate(`/users/edit/${userData.email}`)
               // }
-            >
+            > */}
+            <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold">
                 {/* {userData.email?.charAt(0).toUpperCase() || "U"} */}
                 <img
@@ -196,9 +264,15 @@ export default function Sidebar() {
                           )}
                           <span>{item.label}</span>
                         </div>
-                        <ChevronDown
-                          className={`w-4 h-4 transition-transform ${activeSubmenu === item.label ? "rotate-180" : ""}`}
-                        />
+                        <div className="flex items-center">
+                          {item.badge && (
+                            <NotificationBadge count={item.badge} />
+                          )}
+                          <ChevronDown
+                            // className={`w-4 h-4 transition-transform ${activeSubmenu === item.label ? "rotate-180" : ""}`}
+                            className={`w-4 h-4 transition-transform ml-2 ${activeSubmenu === item.label ? "rotate-180" : ""}`}
+                          />
+                        </div>
                       </button>
 
                       {activeSubmenu === item.label && (
@@ -207,14 +281,28 @@ export default function Sidebar() {
                             <li key={subIndex}>
                               <Link
                                 to={subItem.path}
-                                className={`block px-4 py-2 text-sm rounded-lg ${
+                                // className={`block px-4 py-2 text-sm rounded-lg ${
+                                //   isActive(subItem.path)
+                                //     ? "bg-indigo-50 text-indigo-600 font-medium"
+                                //     : "text-gray-600 hover:bg-gray-50"
+                                // }`}
+                                className={`flex items-center justify-between px-4 py-2 text-sm rounded-lg ${
                                   isActive(subItem.path)
                                     ? "bg-indigo-50 text-indigo-600 font-medium"
                                     : "text-gray-600 hover:bg-gray-50"
                                 }`}
                                 onClick={() => setIsOpen(false)}
                               >
-                                {subItem.label}
+                                {/* {subItem.label} */}
+                                <div className="flex items-center">
+                                  {subItem.icon && (
+                                    <subItem.icon className="w-4 h-4 mr-2 text-gray-500" />
+                                  )}
+                                  <span>{subItem.label}</span>
+                                </div>
+                                {subItem.badge && (
+                                  <NotificationBadge count={subItem.badge} />
+                                )}
                               </Link>
                             </li>
                           ))}
@@ -224,15 +312,20 @@ export default function Sidebar() {
                   ) : (
                     <Link
                       to={item.path}
-                      className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
+                      // className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
+                      className={`flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-lg ${
                         isActive(item.path)
                           ? "bg-indigo-50 text-indigo-600"
                           : "text-gray-700 hover:bg-gray-100"
                       }`}
                       onClick={() => setIsOpen(false)}
                     >
-                      {item.icon && <item.icon className="w-5 h-5 mr-3" />}
-                      {item.label}
+                      <div className="flex items-center">
+                        {item.icon && <item.icon className="w-5 h-5 mr-3" />}
+                        {/* {item.label} */}
+                        <span>{item.label}</span>
+                      </div>
+                      {item.badge && <NotificationBadge count={item.badge} />}
                     </Link>
                   )}
                 </li>
