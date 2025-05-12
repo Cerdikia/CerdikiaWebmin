@@ -13,6 +13,7 @@ import {
   UserCheck,
   MessageCircle,
 } from "lucide-react"
+import FetchData from "./FetchData"
 
 export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
   const location = useLocation()
@@ -57,6 +58,8 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
 
   // Check if current path is in submenu to auto-expand it
   useEffect(() => {
+    fetchUnreadCount()
+
     menuItems.forEach((item) => {
       if (item.submenu) {
         const isInSubmenu = item.submenu.some(
@@ -68,6 +71,16 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
       }
     })
   }, [location.pathname])
+
+  useEffect(() => {
+    fetchUnreadCount()
+
+    // Refresh unread count every minute
+    const intervalId = setInterval(fetchUnreadCount, 60000)
+
+    // Clean up interval on unmount
+    return () => clearInterval(intervalId)
+  }, [])
 
   const toggleSubmenu = (menu) => {
     if (activeSubmenu === menu) {
@@ -145,6 +158,17 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
   ]
 
   const isActive = (path) => location.pathname === path
+
+  // Notification Badge Component
+  const NotificationBadge = ({ count }) => {
+    if (!count || count <= 0) return null
+
+    return (
+      <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">
+        {count > 99 ? "99+" : count}
+      </span>
+    )
+  }
 
   return (
     <>
@@ -230,7 +254,8 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
                             <li key={subIndex}>
                               <Link
                                 to={subItem.path}
-                                className={`block px-4 py-2 text-sm rounded-lg ${
+                                // className={`block px-4 py-2 text-sm rounded-lg ${
+                                className={`flex items-center justify-between px-4 py-2 text-sm rounded-lg ${
                                   isActive(subItem.path)
                                     ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-medium"
                                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -241,7 +266,16 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
                                   }
                                 }}
                               >
-                                {subItem.label}
+                                {/* {subItem.label} */}
+                                <div className="flex items-center">
+                                  {subItem.icon && (
+                                    <subItem.icon className="w-4 h-4 mr-2 text-gray-500" />
+                                  )}
+                                  <span>{subItem.label}</span>
+                                </div>
+                                {subItem.badge && (
+                                  <NotificationBadge count={subItem.badge} />
+                                )}
                               </Link>
                             </li>
                           ))}
