@@ -12,6 +12,8 @@ export default function UserList() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
+  const userData = JSON.parse(localStorage.getItem("user_data"))
+  const [isAdmin, setIsAdmin] = useState(false)
   const [selectedRole, setSelectedRole] = useState("guru") // Default to guru
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState(null)
@@ -24,6 +26,13 @@ export default function UserList() {
 
   // Remove the code that checks for "kepala sekolah" by jabatan
   // Replace the fetchUsers function with this simplified version
+  useEffect(() => {
+    if (userData && userData.role === "admin") {
+      setIsAdmin(true)
+    } else {
+      setIsAdmin(false)
+    }
+  }, [userData])
 
   const fetchUsers = async () => {
     setLoading(true)
@@ -126,6 +135,17 @@ export default function UserList() {
   const handleDeleteClick = (user) => {
     setUserToDelete(user)
     setIsDeleteModalOpen(true)
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="p-8 bg-red-50 rounded-xl border border-red-200">
+        <h2 className="text-xl font-semibold text-red-700">Access Denied</h2>
+        <p className="mt-2 text-red-600">
+          This page is only accessible to administrators.
+        </p>
+      </div>
+    )
   }
 
   return (
