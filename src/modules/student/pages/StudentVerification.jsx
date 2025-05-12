@@ -80,8 +80,11 @@ export default function StudentVerification() {
         // Transform data if needed
         const studentsData = data.Data.map((student) => ({
           // ...student,
-          id: student.Email, // Use Email as unique identifier
-          email: student.Email,
+          id: student.email, // Use Email as unique identifier
+          email: student.email,
+          nama: student.nama,
+          id_kelas: student.id_kelas,
+          kelas: student.kelas,
           // verification_status: student.verification_status || "waiting",
           verification_status: student.VerifiedStatus || "waiting",
         }))
