@@ -1,21 +1,59 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Link, useLocation } from "react-router-dom"
-import { Home, Book, Users, ChevronDown, BarChart, Gift, X } from "lucide-react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
+import {
+  Home,
+  Book,
+  Users,
+  ChevronDown,
+  BarChart,
+  Gift,
+  X,
+  UserCheck,
+  MessageCircle,
+} from "lucide-react"
 
 export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
   const location = useLocation()
   const [activeSubmenu, setActiveSubmenu] = useState(null)
   const [userRole, setUserRole] = useState(null)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [userData, setUserData] = useState(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const data = localStorage.getItem("user_data")
+
+    // check json data ada atau tidak
+    const jsonData = JSON.parse(data)
+    if (jsonData === null) {
+      handleLogout()
+    }
+
     if (data) {
-      const jsonData = JSON.parse(data)
       setUserRole(jsonData?.role)
+      setUserData(JSON.parse(data))
     }
   }, [])
+
+  // Fetch unread message count
+  const fetchUnreadCount = async () => {
+    try {
+      const token = localStorage.getItem("access_token")
+      const response = await FetchData({
+        url: `${import.meta.env.VITE_API_URL}/messages/unread/count/all`,
+        method: "GET",
+        token,
+      })
+
+      if (response && response.Data) {
+        setUnreadCount(response.Data.total_count || 0)
+      }
+    } catch (err) {
+      console.error("Error fetching unread count:", err)
+    }
+  }
 
   // Check if current path is in submenu to auto-expand it
   useEffect(() => {
@@ -36,6 +74,18 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
       setActiveSubmenu(null)
     } else {
       setActiveSubmenu(menu)
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      localStorage.removeItem("token")
+      localStorage.removeItem("refresh_token")
+      localStorage.removeItem("user_data")
+      navigate("/login", { replace: true })
+    } catch (error) {
+      console.error("Logout error:", error)
     }
   }
 
