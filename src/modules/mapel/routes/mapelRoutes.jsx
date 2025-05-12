@@ -1,5 +1,5 @@
 import MapelRedirect from "../view/MapelRedirect";
-import GuruPage from "../view/GuruPage";
+// import GuruPage from "../view/GuruPage";
 import AdminPage from "../view/AdminPage";
 import ListModule from "../view/ListModule";
 import ListSoal from "../view/ListSoal";
@@ -9,7 +9,7 @@ import EditSoal from "../view/EditSoal";
 
 const routes = [
   { path: "/mapel", element: <MapelRedirect /> },
-  { path: "/guru", element: <GuruPage /> },
+  { path: "/guru", element: <AdminPage /> },
   { path: "/admin-mapel", element: <AdminPage /> },
   { path: "/list-module/:id", element: <ListModule /> },
   { path: "/list-soal/:id", element: <ListSoal /> },

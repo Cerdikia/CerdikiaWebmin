@@ -20,7 +20,7 @@ export default [
     element: <HomePage />,
   },
   {
-    path: "/guru",
+    path: "/",
     element: <HomePage />,
   },
 ];

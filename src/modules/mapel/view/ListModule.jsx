@@ -44,7 +44,7 @@ export default function ListModule() {
   const storedId = id
 
   useEffect(() => {
-    setIsAdmin(userData?.role === "admin")
+    setIsAdmin(userData?.role === "admin" || userData.role === "guru")
   }, [userData])
 
   const handleSaveModule = (moduleData) => {

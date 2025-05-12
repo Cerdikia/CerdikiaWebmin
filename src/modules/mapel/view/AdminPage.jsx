@@ -28,7 +28,7 @@ export default function AdminPage() {
   const userData = JSON.parse(localStorage.getItem("user_data"))
 
   useEffect(() => {
-    if (userData && userData.role === "admin") {
+    if (userData && userData.role === "admin" || userData.role === "guru") {
       setIsAdmin(true)
     } else {
       setIsAdmin(false)
