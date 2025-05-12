@@ -18,6 +18,7 @@ export default function UserForm() {
   const [formData, setFormData] = useState({
     email: "",
     nama: "",
+    jabatan: "", // Added jabatan field
   })
 
   const [role, setRole] = useState(roleFromState || "guru")
@@ -26,13 +27,19 @@ export default function UserForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
+    // Check if current user is admin - directly from localStorage
+    const currentUserRole = localStorage.getItem("user_data") ? JSON.parse(localStorage.getItem("user_data")).role : null
+    setIsAdmin(currentUserRole === "admin")
+
     // If we have user data from state, use it
     if (userFromState) {
       setFormData({
         email: userFromState.email || "",
         nama: userFromState.nama || "",
+        jabatan: userFromState.jabatan || "", // Set jabatan from user data
       })
 
       // Set image preview if there's an existing image_profile
@@ -80,6 +87,7 @@ export default function UserForm() {
         setFormData({
           email: data.Data.email || "",
           nama: data.Data.nama || "",
+          jabatan: data.Data.jabatan || "", // Set jabatan from API response
         })
 
         // Set image preview if there's an existing image_profile
@@ -178,8 +186,9 @@ export default function UserForm() {
 
         // If only the role changed (name is the same), don't call editDataUser
         const hasNameChanged = userFromState && userFromState.nama !== formData.nama
+        const hasJabatanChanged = userFromState && userFromState.jabatan !== formData.jabatan
 
-        if (!hasNameChanged) {
+        if (!hasNameChanged && !hasJabatanChanged) {
           // If only the role changed, we're done - redirect after a short delay
           setTimeout(() => {
             navigate("/users")
@@ -188,7 +197,7 @@ export default function UserForm() {
         }
       }
 
-      // If we're here, either it's not edit mode, or the role didn't change, or name changed too
+      // If we're here, either it's not edit mode, or the role didn't change, or name/jabatan changed too
       if (isEditMode) {
         // Update existing user data (only if needed)
         const response = await fetch(`${import.meta.env.VITE_API_URL}/editDataUser/${roleFromState}`, {
@@ -296,13 +305,19 @@ export default function UserForm() {
                 id="role"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                disabled={!isAdmin} // Only admin can change roles
+                className={`w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  !isAdmin ? "bg-gray-100 cursor-not-allowed" : ""
+                }`}
               >
                 <option value="guru">Guru</option>
                 <option value="admin">Admin</option>
                 <option value="kepalaSekolah">Kepala Sekolah</option>
                 <option value="siswa">Siswa</option>
               </select>
+              {!isAdmin && (
+                <p className="text-xs text-amber-600 mt-1">Hanya admin yang dapat mengubah role pengguna.</p>
+              )}
             </div>
 
             <div>
@@ -317,6 +332,21 @@ export default function UserForm() {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="jabatan" className="block text-sm font-medium text-gray-700 mb-1">
+                Jabatan
+              </label>
+              <input
+                type="text"
+                id="jabatan"
+                name="jabatan"
+                value={formData.jabatan}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Contoh: Guru Matematika, Kepala Sekolah, dll."
               />
             </div>
 

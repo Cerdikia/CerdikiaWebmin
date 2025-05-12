@@ -128,7 +128,7 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
       path: "/users",
       label: "Pengguna",
       icon: Users,
-      roles: ["admin", "guru"],
+      roles: ["admin"],
     },
     {
       label: "Gift Management",
