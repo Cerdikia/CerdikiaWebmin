@@ -14,6 +14,7 @@ import {
   MessageCircle,
   FileText,
   Archive,
+  TicketCheck,
 } from "lucide-react"
 import FetchData from "./FetchData"
 
@@ -154,6 +155,11 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
           label: "Messages",
           icon: MessageCircle,
           badge: unreadCount > 0 ? unreadCount : null,
+        },
+        {
+          path: "/gifts/redemptions",
+          label: "Verification",
+          icon: TicketCheck,
         },
       ],
       badge: unreadCount > 0 ? unreadCount : null,
