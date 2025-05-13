@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+// import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Calendar,
@@ -41,7 +42,7 @@ export default function SemesterRecap() {
   const [selectedData, setSelectedData] = useState(null)
   const [createForm, setCreateForm] = useState({
     tahun_ajaran: "",
-    semester: "Ganjil",
+    // semester: "Ganjil",
     delete_logs_data: false,
     filter_kelas: "",
     filter_mapel: "",
@@ -131,8 +132,8 @@ export default function SemesterRecap() {
         token,
       })
 
-      if (response && response.Data) {
-        setClasses(response.Data)
+      if (response) {
+        setClasses(response)
       }
     } catch (error) {
       console.error("Error fetching classes:", error)
@@ -143,7 +144,7 @@ export default function SemesterRecap() {
     try {
       const token = localStorage.getItem("access_token")
       const response = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/mapel`,
+        url: `${import.meta.env.VITE_API_URL}/genericAllMapels`,
         method: "GET",
         token,
       })
@@ -160,8 +161,10 @@ export default function SemesterRecap() {
     setIsProcessing(true)
     try {
       // Validate form
-      if (!createForm.tahun_ajaran || !createForm.semester) {
-        showNotification("Tahun ajaran dan semester harus diisi", "error")
+      // if (!createForm.tahun_ajaran || !createForm.semester) {
+      //   showNotification("Tahun ajaran dan semester harus diisi", "error")
+      if (!createForm.tahun_ajaran) {
+        showNotification("Tahun ajaran harus diisi", "error")
         setIsProcessing(false)
         return
       }
@@ -185,26 +188,60 @@ export default function SemesterRecap() {
       }
 
       const token = localStorage.getItem("access_token")
+
+      // Prepare request body based on the new API
+      const requestBody = {
+        tahun_ajaran: createForm.tahun_ajaran,
+        delete_logs_data: createForm.delete_logs_data,
+      }
+
+      // Add optional parameters if they exist
+      if (createForm.start_date) requestBody.start_date = createForm.start_date
+      if (createForm.end_date) requestBody.end_date = createForm.end_date
+
+      // Use the appropriate endpoint based on whether we're creating for all students or specific ones
+      const endpoint =
+        createForm.filter_kelas || createForm.filter_mapel
+          ? "/rekap-semester"
+          : "/rekap-semester-all-siswa"
+
+      // Add filter parameters if needed
+      if (createForm.filter_kelas)
+        requestBody.id_kelas = createForm.filter_kelas
+      if (createForm.filter_mapel)
+        requestBody.id_mapel = createForm.filter_mapel
       const response = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/rekap-semester`,
+        // url: `${import.meta.env.VITE_API_URL}/rekap-semester`,
+        url: `${import.meta.env.VITE_API_URL}${endpoint}`,
         method: "POST",
         token,
-        body: createForm,
+        // body: createForm,
+        body: requestBody,
       })
 
       if (response) {
-        showNotification(
-          `Rekap semester berhasil dibuat. ${response.success_count} data berhasil direkap, ${
-            response.skipped_count
-          } data dilewati. ${response.logs_deleted ? "Data logs telah dihapus." : ""}`,
-          "success",
-        )
+        // showNotification(
+        //   `Rekap semester berhasil dibuat. ${response.success_count} data berhasil direkap, ${
+        //     response.skipped_count
+        //   } data dilewati. ${response.logs_deleted ? "Data logs telah dihapus." : ""}`,
+        //   "success",
+        // )
+        const successMessage =
+          endpoint === "/rekap-semester-all-siswa"
+            ? `Rekap semester untuk semua siswa berhasil dibuat. Total ${response.total_logs_processed || 0} data diproses.`
+            : `Rekap semester berhasil dibuat. ${response.data?.length || 0} data berhasil direkap.`
+
+        showNotification(successMessage, "success")
         setShowCreateModal(false)
         fetchRecapData()
       }
     } catch (error) {
       console.error("Error creating recap:", error)
-      showNotification("Error creating recap", "error")
+      // showNotification("Error creating recap", "error")
+      showNotification(
+        "Error creating recap: " + (error.message || "Unknown error"),
+        "error",
+      )
     } finally {
       setIsProcessing(false)
     }
@@ -247,8 +284,12 @@ export default function SemesterRecap() {
       })
 
       if (response) {
+        // showNotification(
+        //   `Tahun ajaran berhasil diperbarui. ${response.rows_affected} data terpengaruh.`,
+        //   "success",
+        // )
         showNotification(
-          `Tahun ajaran berhasil diperbarui. ${response.rows_affected} data terpengaruh.`,
+          `Tahun ajaran berhasil diperbarui. ${response.records_updated || 0} data terpengaruh.`,
           "success",
         )
         setShowEditModal(false)
@@ -256,7 +297,11 @@ export default function SemesterRecap() {
       }
     } catch (error) {
       console.error("Error editing tahun ajaran:", error)
-      showNotification("Error editing tahun ajaran", "error")
+      // showNotification("Error editing tahun ajaran", "error")
+      showNotification(
+        "Error editing tahun ajaran: " + (error.message || "Unknown error"),
+        "error",
+      )
     } finally {
       setIsProcessing(false)
     }
@@ -281,7 +326,11 @@ export default function SemesterRecap() {
       }
     } catch (error) {
       console.error("Error deleting recap:", error)
-      showNotification("Error deleting recap", "error")
+      // showNotification("Error deleting recap", "error")
+      showNotification(
+        "Error deleting recap: " + (error.message || "Unknown error"),
+        "error",
+      )
     } finally {
       setIsProcessing(false)
     }
@@ -328,8 +377,8 @@ export default function SemesterRecap() {
               ).toFixed(2)
             : "-"
         const moduleCount = modulesBySubject[subject.id_mapel] || 0
-        subjectData[`${subject.nama_mapel} (Avg)`] = avgScore
-        subjectData[`${subject.nama_mapel} (Modules)`] = moduleCount
+        subjectData[`${subject.mapel} (Avg)`] = avgScore
+        subjectData[`${subject.mapel} (Modules)`] = moduleCount
       })
 
       return {
@@ -384,7 +433,7 @@ export default function SemesterRecap() {
   const resetCreateForm = () => {
     setCreateForm({
       tahun_ajaran: "",
-      semester: "Ganjil",
+      // semester: "Ganjil",
       delete_logs_data: false,
       filter_kelas: "",
       filter_mapel: "",
@@ -417,11 +466,12 @@ export default function SemesterRecap() {
 
   const getSubjectName = (id) => {
     const subject = subjects.find((s) => s.id_mapel === id)
-    return subject ? subject.nama_mapel : `Mapel ID ${id}`
+    return subject ? subject.mapel : `Mapel ID ${id}`
   }
 
   return (
-    <DashboardLayout>
+    // <DashboardLayout>
+    <div className="">
       <div className="container px-4 py-6 mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Rekap Semester</h1>
@@ -550,7 +600,7 @@ export default function SemesterRecap() {
                   ))}
                 </select>
               </div>
-              <div>
+              {/* <div>
                 <label
                   htmlFor="semester"
                   className="block mb-1 text-sm font-medium text-gray-700"
@@ -569,7 +619,7 @@ export default function SemesterRecap() {
                   <option value="Ganjil">Ganjil</option>
                   <option value="Genap">Genap</option>
                 </select>
-              </div>
+              </div> */}
               <div>
                 <label
                   htmlFor="id_kelas"
@@ -588,7 +638,7 @@ export default function SemesterRecap() {
                   <option value="">Semua Kelas</option>
                   {classes.map((kelas) => (
                     <option key={kelas.id_kelas} value={kelas.id_kelas}>
-                      {kelas.nama_kelas}
+                      {kelas.kelas}
                     </option>
                   ))}
                 </select>
@@ -678,8 +728,10 @@ export default function SemesterRecap() {
                   </tr>
                 ) : (
                   filteredData.map((item) => (
-                    <>
-                      <tr key={item.id_data} className="hover:bg-gray-50">
+                    // <>
+                    //   <tr key={item.id_data} className="hover:bg-gray-50">
+                    <React.Fragment key={item.id_data}>
+                      <tr className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div>
@@ -791,7 +843,8 @@ export default function SemesterRecap() {
                           </td>
                         </tr>
                       )}
-                    </>
+                      {/* </> */}
+                    </React.Fragment>
                   ))
                 )}
               </tbody>
@@ -913,7 +966,7 @@ export default function SemesterRecap() {
                   <option value="">Semua Mata Pelajaran</option>
                   {subjects.map((subject) => (
                     <option key={subject.id_mapel} value={subject.id_mapel}>
-                      {subject.nama_mapel}
+                      {subject.mapel}
                     </option>
                   ))}
                 </select>
@@ -1224,6 +1277,7 @@ export default function SemesterRecap() {
           </div>
         </div>
       )}
-    </DashboardLayout>
+      {/* </DashboardLayout> */}
+    </div>
   )
 }
