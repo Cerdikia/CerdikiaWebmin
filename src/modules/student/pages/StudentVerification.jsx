@@ -192,7 +192,7 @@ export default function StudentVerification() {
       //   verification_status: bulkAction,
       const verificationData = selectedIds.map((email) => ({
         email: email,
-        verified_status: bulkAction,
+        verification_status: bulkAction,
       }))
 
       // Prepare notification messages
