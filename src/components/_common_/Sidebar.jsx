@@ -12,6 +12,8 @@ import {
   X,
   UserCheck,
   MessageCircle,
+  FileText,
+  Archive,
 } from "lucide-react"
 import FetchData from "./FetchData"
 
@@ -76,7 +78,7 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
     fetchUnreadCount()
 
     // Refresh unread count every minute
-    const intervalId = setInterval(fetchUnreadCount, 60000)
+    const intervalId = setInterval(fetchUnreadCount, 600000)
 
     // Clean up interval on unmount
     return () => clearInterval(intervalId)
@@ -121,6 +123,8 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
       submenu: [
         { path: "/scores", label: "Student Scores" },
         { path: "/rankings", label: "Student Rankings" },
+        { path: "/score-report", label: "Score Report", icon: FileText },
+        { path: "/semester-recap", label: "Semester Recap", icon: Archive },
       ],
       roles: ["admin", "guru"],
     },
