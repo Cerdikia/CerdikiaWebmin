@@ -86,7 +86,7 @@ export default function StudentVerification() {
           id_kelas: student.id_kelas,
           kelas: student.kelas,
           // verification_status: student.verification_status || "waiting",
-          verification_status: student.VerifiedStatus || "waiting",
+          verified_status: student.verified_status || "waiting",
         }))
         setStudents(studentsData)
         setFilteredStudents(studentsData)
@@ -122,7 +122,7 @@ export default function StudentVerification() {
     // Filter by verification status
     if (selectedStatus !== "all") {
       filtered = filtered.filter(
-        (student) => student.verification_status === selectedStatus,
+        (student) => student.verified_status === selectedStatus,
       )
     }
 
@@ -192,7 +192,7 @@ export default function StudentVerification() {
       //   verification_status: bulkAction,
       const verificationData = selectedIds.map((email) => ({
         email: email,
-        verification_status: bulkAction,
+        verified_status: bulkAction,
       }))
 
       // Prepare notification messages
@@ -251,7 +251,7 @@ export default function StudentVerification() {
           //   ? { ...student, verification_status: bulkAction }
           //   : student,
           selectedStudents[student.email]
-            ? { ...student, verification_status: bulkAction }
+            ? { ...student, verified_status: bulkAction }
             : student,
         ),
       )
@@ -280,7 +280,7 @@ export default function StudentVerification() {
 
   // Get count of students by verification status
   const getStatusCount = (status) => {
-    return students.filter((student) => student.verification_status === status)
+    return students.filter((student) => student.verified_status === status)
       .length
   }
 
@@ -615,14 +615,14 @@ export default function StudentVerification() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            student.verification_status === "accept"
+                            student.verified_status === "accept"
                               ? "bg-green-100 text-green-800"
-                              : student.verification_status === "rejected"
+                              : student.verified_status === "rejected"
                                 ? "bg-red-100 text-red-800"
                                 : "bg-amber-100 text-amber-800"
                           }`}
                         >
-                          {student.verification_status}
+                          {student.verified_status}
                         </span>
                       </td>
                     </tr>
