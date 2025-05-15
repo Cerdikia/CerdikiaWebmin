@@ -153,7 +153,7 @@ export default function UploadSoal() {
         throw new Error("Failed to save question")
       }
 
-      const data = await response.json()
+      await response.json()
 
       setSuccess("Question successfully added!")
 
