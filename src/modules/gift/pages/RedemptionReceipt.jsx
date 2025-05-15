@@ -324,7 +324,10 @@ const RedemptionReceipt = () => {
     //     )}
     //   </div>
     // </DashboardLayout>
-    <div dangerouslySetInnerHTML={{ __html: receipt }} />
+    <div
+      className="container mx-auto px-4 py-8"
+      dangerouslySetInnerHTML={{ __html: receipt }}
+    />
     // <div className="">
     //   <h1>ok</h1>
     // </div>
