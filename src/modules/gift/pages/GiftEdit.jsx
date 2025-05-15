@@ -13,11 +13,7 @@ import RefreshToken from "../../../components/_common_/RefreshToken"
 import Notification from "../components/Notification"
 
 // Register FilePond plugins
-registerPlugin(
-  FilePondPluginImagePreview,
-  FilePondPluginFileValidateType,
-  FilePondPluginImageExifOrientation,
-)
+registerPlugin(FilePondPluginImagePreview, FilePondPluginFileValidateType, FilePondPluginImageExifOrientation)
 
 export default function GiftEdit() {
   const { id } = useParams()
@@ -50,26 +46,20 @@ export default function GiftEdit() {
     const fetchGiftData = async () => {
       try {
         setFetchLoading(true)
-        let response = await fetch(
-          `${import.meta.env.VITE_API_URL}/gifts/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-            },
+        let response = await fetch(`${import.meta.env.VITE_API_URL}/gifts/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
-        )
+        })
 
         if (response.status === 401) {
           const refreshed = await RefreshToken()
           if (refreshed) {
-            response = await fetch(
-              `${import.meta.env.VITE_API_URL}/gifts/${id}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-                },
+            response = await fetch(`${import.meta.env.VITE_API_URL}/gifts/${id}`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
               },
-            )
+            })
           } else {
             navigate("/login", { replace: true })
             return
@@ -90,9 +80,6 @@ export default function GiftEdit() {
 
           // Set image preview if available
           if (gift.img) {
-            const imgUrl = gift.img.startsWith("http")
-              ? gift.img
-              : `http://${gift.img}`
             // We don't set files here because FilePond expects a File object
             // Instead, we'll show the image in a preview element
           }
@@ -116,11 +103,45 @@ export default function GiftEdit() {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "quantity" || name === "diamond_value"
-          ? Number.parseInt(value) || 0
-          : value,
+      [name]: name === "quantity" || name === "diamond_value" ? Number.parseInt(value) || 0 : value,
     }))
+  }
+
+  const resizeImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = (event) => {
+        const img = new Image()
+        img.src = event.target.result
+        img.onload = () => {
+          const canvas = document.createElement("canvas")
+          canvas.width = 86
+          canvas.height = 86
+          const ctx = canvas.getContext("2d")
+          ctx.drawImage(img, 0, 0, 86, 86)
+
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              reject(new Error("Canvas to Blob conversion failed"))
+              return
+            }
+            // Create a new file from the blob with the same name
+            const resizedFile = new File([blob], file.name, {
+              type: file.type,
+              lastModified: Date.now(),
+            })
+            resolve(resizedFile)
+          }, file.type)
+        }
+        img.onerror = (error) => {
+          reject(error)
+        }
+      }
+      reader.onerror = (error) => {
+        reject(error)
+      }
+    })
   }
 
   const handleSubmit = async (e) => {
@@ -139,34 +160,30 @@ export default function GiftEdit() {
 
       // Append the image file if a new one was selected
       if (files.length > 0) {
-        apiFormData.append("image", files[0].file)
+        // Resize the image before uploading
+        const resizedImage = await resizeImage(files[0].file)
+        apiFormData.append("image", resizedImage)
       }
 
       // Make the API request
-      let response = await fetch(
-        `${import.meta.env.VITE_API_URL}/gifts/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-          body: apiFormData,
+      let response = await fetch(`${import.meta.env.VITE_API_URL}/gifts/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
-      )
+        body: apiFormData,
+      })
 
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(
-            `${import.meta.env.VITE_API_URL}/gifts/${id}`,
-            {
-              method: "PUT",
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-              },
-              body: apiFormData,
+          response = await fetch(`${import.meta.env.VITE_API_URL}/gifts/${id}`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
-          )
+            body: apiFormData,
+          })
         } else {
           navigate("/login", { replace: true })
           return
@@ -204,9 +221,7 @@ export default function GiftEdit() {
     return (
       <div className="p-8 bg-red-50 rounded-xl border border-red-200">
         <h2 className="text-xl font-semibold text-red-700">Access Denied</h2>
-        <p className="mt-2 text-red-600">
-          This page is only accessible to administrators.
-        </p>
+        <p className="mt-2 text-red-600">This page is only accessible to administrators.</p>
       </div>
     )
   }
@@ -238,18 +253,11 @@ export default function GiftEdit() {
   return (
     <div className="container mx-auto p-4">
       {notification && (
-        <Notification
-          type={notification.type}
-          message={notification.message}
-          onClose={() => setNotification(null)}
-        />
+        <Notification type={notification.type} message={notification.message} onClose={() => setNotification(null)} />
       )}
 
       <div className="flex items-center mb-6">
-        <button
-          onClick={() => navigate("/gifts")}
-          className="mr-4 p-2 rounded-full hover:bg-gray-100"
-        >
+        <button onClick={() => navigate("/gifts")} className="mr-4 p-2 rounded-full hover:bg-gray-100">
           <ArrowLeft size={20} />
         </button>
         <h1 className="text-2xl font-bold">Edit Gift</h1>
@@ -265,10 +273,7 @@ export default function GiftEdit() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                 Gift Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -284,10 +289,7 @@ export default function GiftEdit() {
             </div>
 
             <div>
-              <label
-                htmlFor="quantity"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
                 Quantity <span className="text-red-500">*</span>
               </label>
               <input
@@ -303,17 +305,11 @@ export default function GiftEdit() {
             </div>
 
             <div>
-              <label
-                htmlFor="diamond_value"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="diamond_value" className="block text-sm font-medium text-gray-700 mb-1">
                 Diamond Value <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <Diamond
-                  size={18}
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500"
-                />
+                <Diamond size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
                 <input
                   type="number"
                   id="diamond_value"
@@ -328,10 +324,7 @@ export default function GiftEdit() {
             </div>
 
             <div>
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                 Description
               </label>
               <textarea
@@ -347,9 +340,7 @@ export default function GiftEdit() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Gift Image
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Gift Image</label>
 
             {/* Current image preview */}
             {originalGift && originalGift.img && (
@@ -357,11 +348,7 @@ export default function GiftEdit() {
                 <p className="text-sm text-gray-500 mb-2">Current Image:</p>
                 <div className="w-40 h-40 rounded-md overflow-hidden bg-gray-100 border border-gray-200">
                   <img
-                    src={
-                      originalGift.img.startsWith("http")
-                        ? originalGift.img
-                        : `http://${originalGift.img}`
-                    }
+                    src={originalGift.img.startsWith("http") ? originalGift.img : `http://${originalGift.img}`}
                     alt={originalGift.nama_barang}
                     className="w-full h-full object-cover"
                   />
@@ -376,12 +363,7 @@ export default function GiftEdit() {
               maxFiles={1}
               name="image"
               labelIdle='Drag & Drop a new image or <span class="filepond--label-action">Browse</span>'
-              acceptedFileTypes={[
-                "image/png",
-                "image/jpeg",
-                "image/jpg",
-                "image/gif",
-              ]}
+              acceptedFileTypes={["image/png", "image/jpeg", "image/jpg", "image/gif"]}
               stylePanelLayout="compact"
               imagePreviewHeight={200}
               imageCropAspectRatio="1:1"
@@ -391,7 +373,7 @@ export default function GiftEdit() {
             />
             <p className="text-xs text-gray-500 mt-1">
               {files.length > 0
-                ? "New image will replace the current one."
+                ? "New image will replace the current one and be resized to 86x86 pixels."
                 : "Leave empty to keep the current image. Supported formats: JPG, PNG, GIF. Max file size: 5MB."}
             </p>
           </div>
