@@ -15,6 +15,7 @@ import {
   Edit,
   HelpCircle,
   X,
+  Trash2,
 } from "lucide-react"
 import ReactQuill from "react-quill"
 import "react-quill/dist/quill.snow.css"
@@ -34,6 +35,7 @@ export default function ImportModule() {
   const [editingQuestion, setEditingQuestion] = useState(null)
   const [editingOption, setEditingOption] = useState(null)
   const [editedContent, setEditedContent] = useState("")
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null)
 
   // Quill modules and formats configuration
   const quillModules = {
@@ -258,6 +260,44 @@ export default function ImportModule() {
     }
   }
 
+  // Handle delete confirmation
+  const openDeleteConfirmation = (
+    type,
+    subjectIndex,
+    moduleIndex = null,
+    questionIndex = null,
+  ) => {
+    setDeleteConfirmation({
+      type,
+      subjectIndex,
+      moduleIndex,
+      questionIndex,
+    })
+  }
+
+  // Handle delete action
+  const handleDelete = () => {
+    if (!deleteConfirmation) return
+
+    const { type, subjectIndex, moduleIndex, questionIndex } =
+      deleteConfirmation
+    const newData = [...parsedData]
+
+    if (type === "subject") {
+      // Delete subject
+      newData.splice(subjectIndex, 1)
+    } else if (type === "module") {
+      // Delete module
+      newData[subjectIndex].module.splice(moduleIndex, 1)
+    } else if (type === "question") {
+      // Delete question
+      newData[subjectIndex].module[moduleIndex].soal.splice(questionIndex, 1)
+    }
+
+    setParsedData(newData)
+    setDeleteConfirmation(null)
+  }
+
   return (
     <div className="container mx-auto p-4">
       {/* Header with back button and title */}
@@ -459,6 +499,15 @@ export default function ImportModule() {
                           question(s)
                         </p>
                       </div>
+                      <button
+                        onClick={() =>
+                          openDeleteConfirmation("subject", subjectIndex)
+                        }
+                        className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50"
+                        aria-label="Delete subject"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </div>
 
@@ -482,7 +531,22 @@ export default function ImportModule() {
                               {module.soal.length} question(s)
                             </p>
                           </div>
-                          <div>
+                          <div className="flex items-center">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openDeleteConfirmation(
+                                  "module",
+                                  subjectIndex,
+                                  moduleIndex,
+                                )
+                              }}
+                              className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50 mr-2"
+                              aria-label="Delete module"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+
                             {expandedModules[
                               `${subjectIndex}-${moduleIndex}`
                             ] ? (
@@ -540,6 +604,21 @@ export default function ImportModule() {
                                         aria-label="Edit question"
                                       >
                                         <Edit size={16} />
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          openDeleteConfirmation(
+                                            "question",
+                                            subjectIndex,
+                                            moduleIndex,
+                                            questionIndex,
+                                          )
+                                        }}
+                                        className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50 mr-2"
+                                        aria-label="Delete question"
+                                      >
+                                        <Trash2 size={16} />
                                       </button>
                                       {expandedQuestions[
                                         `${subjectIndex}-${moduleIndex}-${questionIndex}`
@@ -777,6 +856,14 @@ export default function ImportModule() {
                       <li>Save your changes when done</li>
                       <li>All HTML content will be properly preserved</li>
                     </ul>
+                    <p className="mt-2 mb-1">
+                      You can also delete items by clicking the trash icon:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>Delete subjects, modules, or individual questions</li>
+                      <li>A confirmation dialog will appear before deletion</li>
+                      <li>Deletions cannot be undone after saving</li>
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -813,6 +900,60 @@ export default function ImportModule() {
           </div>
         )}
       </div>
+
+      {deleteConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Confirm Deletion
+              </h3>
+              <button
+                onClick={() => setDeleteConfirmation(null)}
+                className="p-1 rounded-full hover:bg-gray-100"
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-4">
+              <div className="flex items-center mb-4">
+                <div className="bg-red-100 p-2 rounded-full mr-3">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
+                </div>
+                <p className="text-gray-800 font-medium">
+                  {deleteConfirmation.type === "subject"
+                    ? "Are you sure you want to delete this subject?"
+                    : deleteConfirmation.type === "module"
+                      ? "Are you sure you want to delete this module?"
+                      : "Are you sure you want to delete this question?"}
+                </p>
+              </div>
+              <p className="text-gray-600 mb-4">
+                {deleteConfirmation.type === "subject"
+                  ? "This will delete the subject and all its modules and questions. This action cannot be undone."
+                  : deleteConfirmation.type === "module"
+                    ? "This will delete the module and all its questions. This action cannot be undone."
+                    : "This action cannot be undone."}
+              </p>
+            </div>
+            <div className="p-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setDeleteConfirmation(null)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Custom CSS for Quill content */}
       <style jsx global>{`
