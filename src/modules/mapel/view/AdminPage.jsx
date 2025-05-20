@@ -1,8 +1,18 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import { Book, Plus, Search, RefreshCw, Pencil, Trash2, ChevronDown, MoreHorizontal } from "lucide-react"
+import {
+  Book,
+  Plus,
+  Search,
+  RefreshCw,
+  Pencil,
+  Trash2,
+  ChevronDown,
+  MoreHorizontal,
+  Upload,
+} from "lucide-react"
 import RefreshToken from "../../../components/_common_/RefreshToken"
 import MapelModal from "../../../components/MapelPage/MapelModal"
 import DeleteMapelModal from "../../../components/MapelPage/DeleteMapelModal"
@@ -10,7 +20,7 @@ import DeleteMapelModal from "../../../components/MapelPage/DeleteMapelModal"
 export default function AdminPage() {
   const navigate = useNavigate()
   const [mapel, setMapel] = useState([])
-  const [filteredMapel, setFilteredMapel] = useState([])
+  // const [filteredMapel, setFilteredMapel] = useState([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
@@ -26,9 +36,17 @@ export default function AdminPage() {
   })
   const [isAdmin, setIsAdmin] = useState(false)
   const userData = JSON.parse(localStorage.getItem("user_data"))
+  // Add these state variables
+  const [userRole, setUserRole] = useState("")
+  const [teacherSubjects, setTeacherSubjects] = useState([])
+  const [filteredMapel, setFilteredMapel] = useState([])
+  // Use ref to track initialization
+  const initialized = useRef(false)
 
   useEffect(() => {
-    if (userData && userData.role === "admin" || userData.role === "guru") {
+    console.log(userData.role)
+    // if ((userData && userData.role === "admin") || userData.role === "guru") {
+    if ((userData && userData.role === "admin") || userData?.role === "guru") {
       setIsAdmin(true)
     } else {
       setIsAdmin(false)
@@ -115,7 +133,7 @@ export default function AdminPage() {
         }))
 
         setMapel(transformedData)
-        setFilteredMapel(transformedData)
+        // setFilteredMapel(transformedData)
 
         // Calculate stats
         const statsByKelas = {}
@@ -152,19 +170,56 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
+    if (initialized.current) return
+    const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
+    setUserRole(userData.role || "")
+
+    // If user is a teacher, get their subjects
+    if (userData.role === "guru") {
+      const guruMapel = JSON.parse(localStorage.getItem("guru_mapel") || "[]")
+      console.log("Teacher subjects:", guruMapel)
+      setTeacherSubjects(guruMapel)
+    }
     fetchKelasData()
     fetchData()
-  }, [selectedKelas]) // Refetch when selectedKelas changes
+    // }, [selectedKelas]) // Refetch when selectedKelas changes
+    initialized.current = true
+  }, [])
 
   useEffect(() => {
-    // Filter mapel based on search term
-    if (searchTerm) {
-      const filtered = mapel.filter((item) => item.mapel.toLowerCase().includes(searchTerm.toLowerCase()))
+    if (mapel.length > 0) {
+      let filtered = [...mapel]
+
+      // Apply role-based filtering
+      if (userRole === "guru" && teacherSubjects.length > 0) {
+        // const filtered = mapel.filter((item) =>
+        filtered = mapel.filter((item) =>
+          teacherSubjects.some(
+            (subject) => Number(subject.id_mapel) === Number(item.id_mapel),
+          ),
+        )
+      }
+
+      // Filter mapel based on search term
+      if (searchTerm) {
+        const filtered = mapel.filter((item) =>
+          item.mapel.toLowerCase().includes(searchTerm.toLowerCase()),
+        )
+      }
       setFilteredMapel(filtered)
     } else {
-      setFilteredMapel(mapel)
+      // setFilteredMapel(mapel)
+      setFilteredMapel([])
     }
-  }, [searchTerm, mapel])
+    // }, [searchTerm, mapel])
+  }, [mapel, userRole, teacherSubjects, searchTerm])
+
+  // Refetch when selectedKelas changes
+  useEffect(() => {
+    if (initialized.current) {
+      fetchData()
+    }
+  }, [selectedKelas])
 
   const handleRowClick = (id) => {
     navigate(`/list-module/${id}`)
@@ -187,17 +242,24 @@ export default function AdminPage() {
     if (!deleteMapel) return
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/genericMapels/${deleteMapel.id_mapel}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/genericMapels/${deleteMapel.id_mapel}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         },
-      })
+      )
 
       if (response.ok) {
         // Remove the deleted item from the state
         setMapel(mapel.filter((item) => item.id_mapel !== deleteMapel.id_mapel))
-        setFilteredMapel(filteredMapel.filter((item) => item.id_mapel !== deleteMapel.id_mapel))
+        setFilteredMapel(
+          filteredMapel.filter(
+            (item) => item.id_mapel !== deleteMapel.id_mapel,
+          ),
+        )
         alert("Mata pelajaran berhasil dihapus")
       } else {
         alert("Gagal menghapus mata pelajaran")
@@ -209,6 +271,10 @@ export default function AdminPage() {
       setIsDeleteModalOpen(false)
       setDeleteMapel(null)
     }
+  }
+
+  const handleImportModule = () => {
+    navigate("/import-module")
   }
 
   if (!isAdmin) {
@@ -224,8 +290,12 @@ export default function AdminPage() {
     <div className="container mx-auto p-4">
       {/* Header with title */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Mata Pelajaran</h1>
-        <p className="text-gray-500">Kelola semua mata pelajaran dan modul pembelajaran</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          Mata Pelajaran
+        </h1>
+        <p className="text-gray-500">
+          Kelola semua mata pelajaran dan modul pembelajaran
+        </p>
       </div>
 
       {/* Stats cards */}
@@ -236,11 +306,19 @@ export default function AdminPage() {
         >
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-gray-500">Semua Mata Pelajaran</p>
-              <p className="text-3xl font-bold mt-2 text-gray-900">{stats.total}</p>
+              <p className="text-sm font-medium text-gray-500">
+                Semua Mata Pelajaran
+              </p>
+              <p className="text-3xl font-bold mt-2 text-gray-900">
+                {stats.total}
+              </p>
             </div>
-            <div className={`p-3 rounded-lg ${selectedKelas === "all" ? "bg-indigo-500" : "bg-indigo-100"}`}>
-              <Book className={`w-6 h-6 ${selectedKelas === "all" ? "text-white" : "text-indigo-600"}`} />
+            <div
+              className={`p-3 rounded-lg ${selectedKelas === "all" ? "bg-indigo-500" : "bg-indigo-100"}`}
+            >
+              <Book
+                className={`w-6 h-6 ${selectedKelas === "all" ? "text-white" : "text-indigo-600"}`}
+              />
             </div>
           </div>
         </div>
@@ -256,8 +334,12 @@ export default function AdminPage() {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">{kelasData.name}</p>
-                  <p className="text-3xl font-bold mt-2 text-gray-900">{kelasData.count}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    {kelasData.name}
+                  </p>
+                  <p className="text-3xl font-bold mt-2 text-gray-900">
+                    {kelasData.count}
+                  </p>
                 </div>
                 <div
                   className={`p-3 rounded-lg ${selectedKelas === kelasId.toString() ? "bg-indigo-500" : "bg-indigo-100"}`}
@@ -277,7 +359,10 @@ export default function AdminPage() {
         <div className="p-6 border-b border-gray-100">
           <div className="flex flex-col md:flex-row gap-4 justify-between">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Cari mata pelajaran..."
@@ -296,7 +381,10 @@ export default function AdminPage() {
                 >
                   <option value="all">Semua Kelas</option>
                   {kelasList.map((kelas) => (
-                    <option key={kelas.id_kelas} value={kelas.id_kelas.toString()}>
+                    <option
+                      key={kelas.id_kelas}
+                      value={kelas.id_kelas.toString()}
+                    >
                       {kelas.kelas}
                     </option>
                   ))}
@@ -313,6 +401,14 @@ export default function AdminPage() {
               >
                 <RefreshCw size={18} />
                 <span className="hidden sm:inline">Refresh</span>
+              </button>
+
+              <button
+                onClick={handleImportModule}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+              >
+                <Upload size={18} />
+                <span className="hidden sm:inline">Import Module</span>
               </button>
 
               <button
@@ -340,7 +436,9 @@ export default function AdminPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    ID
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Mata Pelajaran
                   </th>
@@ -360,15 +458,21 @@ export default function AdminPage() {
                       className="hover:bg-gray-50 cursor-pointer"
                       onClick={() => handleRowClick(row.id_mapel)}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.id_mapel}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {row.id_mapel}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center">
                             <Book className="h-5 w-5 text-indigo-600" />
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{row.mapel}</div>
-                            <div className="text-sm text-gray-500">{row.modules_count || 0} modul</div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {row.mapel}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {row.modules_count || 0} modul
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -378,7 +482,10 @@ export default function AdminPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
+                        <div
+                          className="flex justify-end space-x-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <button
                             className="text-indigo-600 hover:text-indigo-900 p-1 rounded-full hover:bg-indigo-50"
                             onClick={(e) => handleEditClick(e, row)}
@@ -405,11 +512,18 @@ export default function AdminPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="px-6 py-12 text-center text-sm text-gray-500">
+                    <td
+                      colSpan="4"
+                      className="px-6 py-12 text-center text-sm text-gray-500"
+                    >
                       <div className="flex flex-col items-center">
                         <Book className="w-12 h-12 text-gray-300 mb-2" />
-                        <p className="text-gray-500 mb-1">Tidak ada mata pelajaran ditemukan</p>
-                        <p className="text-gray-400 text-xs">Coba ubah filter atau tambahkan mata pelajaran baru</p>
+                        <p className="text-gray-500 mb-1">
+                          Tidak ada mata pelajaran ditemukan
+                        </p>
+                        <p className="text-gray-400 text-xs">
+                          Coba ubah filter atau tambahkan mata pelajaran baru
+                        </p>
                       </div>
                     </td>
                   </tr>
@@ -422,7 +536,8 @@ export default function AdminPage() {
         {/* Footer with pagination */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            Menampilkan <span className="font-medium">{filteredMapel.length}</span> dari{" "}
+            Menampilkan{" "}
+            <span className="font-medium">{filteredMapel.length}</span> dari{" "}
             <span className="font-medium">{mapel.length}</span> mata pelajaran
           </div>
 
@@ -438,7 +553,9 @@ export default function AdminPage() {
       </div>
 
       <MapelModal
-        endpoint={isEditMode ? `genericMapels/${editMapel?.id_mapel}` : "genericMapels"}
+        endpoint={
+          isEditMode ? `genericMapels/${editMapel?.id_mapel}` : "genericMapels"
+        }
         method={isEditMode ? "PUT" : "POST"}
         isOpen={isModalOpen}
         onClose={() => {

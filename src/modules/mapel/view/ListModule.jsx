@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Book,
@@ -14,6 +14,7 @@ import {
   FileText,
   ToggleLeft,
   ToggleRight,
+  FileSpreadsheet,
 } from "lucide-react"
 import RefreshToken from "../../../components/_common_/RefreshToken"
 import FetchData from "../../../components/_common_/FetchData"
@@ -36,15 +37,10 @@ export default function ListModule() {
   const userData = JSON.parse(localStorage.getItem("user_data"))
   const [isAdmin, setIsAdmin] = useState(false)
   const [toggleLoading, setToggleLoading] = useState(null)
+  const [teacherSubjects, setTeacherSubjects] = useState([])
+  const [isAuthorized, setIsAuthorized] = useState(true)
 
-  // Store mapel ID in localStorage
-  useEffect(() => {
-    // if (id) {
-    //   localStorage.setItem("idMapel", id)
-    // }
-  }, [id])
-
-  const storedId = id
+  const isInitialized = useRef(false)
 
   useEffect(() => {
     setIsAdmin(userData?.role === "admin" || userData.role === "guru")
@@ -87,22 +83,29 @@ export default function ListModule() {
   }
 
   const fetchData = async () => {
+    console.log("fetchDatadijalankan")
     try {
       setLoading(true)
-      let response = await fetch(`${import.meta.env.VITE_API_URL}/genericModules?id_mapel=${storedId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      let response = await fetch(
+        `${import.meta.env.VITE_API_URL}/genericModules?id_mapel=${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         },
-      })
+      )
 
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(`${import.meta.env.VITE_API_URL}/genericModules?id_mapel=${storedId}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          response = await fetch(
+            `${import.meta.env.VITE_API_URL}/genericModules?id_mapel=${id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+              },
             },
-          })
+          )
         } else {
           window.location.href = "/login"
           return
@@ -124,11 +127,72 @@ export default function ListModule() {
     }
   }
 
+  const checkAuthorization = useCallback(() => {
+    if (userData?.role === "guru") {
+      const guruMapel = JSON.parse(localStorage.getItem("guru_mapel") || "[]")
+      setTeacherSubjects(guruMapel)
+
+      const hasAccess = guruMapel.some(
+        (subject) => Number(subject.id_mapel) === Number(id),
+      )
+      if (!hasAccess) {
+        setIsAuthorized(false)
+        return false
+      }
+    }
+    setIsAuthorized(true)
+    return true
+  }, [id, userData?.role])
+
   useEffect(() => {
-    getMataPelajaran(storedId)
-    getKelas()
-    fetchData()
-  }, [storedId])
+    // Skip if already initialized
+    if (isInitialized.current) return
+
+    console.log("Initializing ListModule component")
+
+    // Check authorization first
+    const authorized = checkAuthorization()
+
+    // If authorized, fetch data
+    console.log("check authorization dijakankan")
+
+    if (authorized) {
+      getMataPelajaran(id)
+      getKelas()
+      fetchData()
+    } else {
+      // If not authorized, redirect (with a slight delay to prevent race conditions)
+      setTimeout(() => {
+        navigate("/admin-mapel", { replace: true })
+      }, 100)
+    }
+    // Mark as initialized
+    isInitialized.current = true
+    // Reset refs when component unmounts
+    return () => {
+      isInitialized.current = false
+    }
+  }, [id, checkAuthorization, navigate])
+
+  // Effect to handle changes to the ID parameter
+  useEffect(() => {
+    // Skip the first initialization (handled by the effect above)
+    if (!isInitialized.current) return
+
+    console.log("ID parameter changed, rechecking authorization")
+
+    // Check authorization for the new ID
+    const authorized = checkAuthorization()
+
+    if (authorized) {
+      // Fetch data for the new ID
+      getMataPelajaran(id)
+      fetchData()
+    } else {
+      // Redirect if not authorized
+      navigate("/admin-mapel", { replace: true })
+    }
+  }, [id, checkAuthorization, navigate])
 
   // Filter modules based on search term
   const filteredModules = modules.filter((module) => {
@@ -159,16 +223,23 @@ export default function ListModule() {
     if (!deleteModule) return
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/genericModules/${deleteModule.id_module}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/genericModules/${deleteModule.id_module}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         },
-      })
+      )
 
       if (response.ok) {
         // Remove the deleted item from the state
-        setModules(modules.filter((module) => module.id_module !== deleteModule.id_module))
+        setModules(
+          modules.filter(
+            (module) => module.id_module !== deleteModule.id_module,
+          ),
+        )
         alert("Modul berhasil dihapus")
       } else {
         alert("Gagal menghapus modul")
@@ -188,18 +259,27 @@ export default function ListModule() {
     try {
       setToggleLoading(module.id_module)
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/togle-module/${module.id_module}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/togle-module/${module.id_module}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         },
-      })
+      )
 
       if (response.ok) {
         const data = await response.json()
 
         // Update the module in the state
-        setModules(modules.map((m) => (m.id_module === module.id_module ? { ...m, is_ready: data.is_ready } : m)))
+        setModules(
+          modules.map((m) =>
+            m.id_module === module.id_module
+              ? { ...m, is_ready: data.is_ready }
+              : m,
+          ),
+        )
       } else {
         alert("Gagal mengubah status modul")
       }
@@ -209,6 +289,23 @@ export default function ListModule() {
     } finally {
       setToggleLoading(null)
     }
+  }
+
+  // Manual refresh handler that resets the fetch flag
+  const handleRefresh = () => {
+    console.log("handleRefresh dijalankan")
+
+    // dataFetchDone.current = false
+    fetchData()
+  }
+
+  // If not authorized, don't render anything (redirect will happen)
+  if (!isAuthorized) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    )
   }
 
   // Check if user is admin
@@ -235,7 +332,9 @@ export default function ListModule() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Daftar Modul</h1>
           <p className="text-gray-500 text-sm mt-1">
-            {mapelDetail.text ? `Mata Pelajaran: ${mapelDetail.text}` : "Kelola modul pembelajaran"}
+            {mapelDetail.text
+              ? `Mata Pelajaran: ${mapelDetail.text}`
+              : "Kelola modul pembelajaran"}
           </p>
         </div>
       </div>
@@ -246,7 +345,10 @@ export default function ListModule() {
         <div className="p-6 border-b border-gray-100">
           <div className="flex flex-col md:flex-row gap-4 justify-between">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Cari modul..."
@@ -258,7 +360,8 @@ export default function ListModule() {
 
             <div className="flex gap-2">
               <button
-                onClick={fetchData}
+                // onClick={fetchData}
+                onClick={handleRefresh}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <RefreshCw size={18} />
@@ -326,19 +429,27 @@ export default function ListModule() {
                           {module.kelas}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{module.id_module}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{module.module}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {module.id_module}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {module.module}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center">
                             <FileText className="h-5 w-5 text-indigo-600" />
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{module.module_judul}</div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {module.module_judul}
+                            </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{module.module_deskripsi}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {module.module_deskripsi}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                         <button
                           onClick={(e) => handleToggleReady(e, module)}
@@ -361,7 +472,10 @@ export default function ListModule() {
                         </button>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
+                        <div
+                          className="flex justify-end space-x-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <button
                             className="text-indigo-600 hover:text-indigo-900 p-1 rounded-full hover:bg-indigo-50"
                             onClick={(e) => handleEditClick(e, module)}
@@ -380,11 +494,18 @@ export default function ListModule() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" className="px-6 py-12 text-center text-sm text-gray-500">
+                    <td
+                      colSpan="7"
+                      className="px-6 py-12 text-center text-sm text-gray-500"
+                    >
                       <div className="flex flex-col items-center">
                         <Book className="w-12 h-12 text-gray-300 mb-2" />
-                        <p className="text-gray-500 mb-1">Tidak ada modul ditemukan</p>
-                        <p className="text-gray-400 text-xs">Tambahkan modul baru untuk mata pelajaran ini</p>
+                        <p className="text-gray-500 mb-1">
+                          Tidak ada modul ditemukan
+                        </p>
+                        <p className="text-gray-400 text-xs">
+                          Tambahkan modul baru untuk mata pelajaran ini
+                        </p>
                       </div>
                     </td>
                   </tr>
@@ -397,13 +518,18 @@ export default function ListModule() {
         {/* Footer with pagination */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            Menampilkan <span className="font-medium">{filteredModules.length}</span> modul
+            Menampilkan{" "}
+            <span className="font-medium">{filteredModules.length}</span> modul
           </div>
         </div>
       </div>
 
       <ModuleModal
-        endpoint={isEditMode ? `genericModules/${editModule?.id_module}` : "genericModules"}
+        endpoint={
+          isEditMode
+            ? `genericModules/${editModule?.id_module}`
+            : "genericModules"
+        }
         method={isEditMode ? "PUT" : "POST"}
         isOpen={isModalOpen}
         onClose={() => {
@@ -413,7 +539,13 @@ export default function ListModule() {
         }}
         onSave={handleSaveModule}
         kelasOptions={kelasList}
-        fields={["id_kelas", "id_mapel", "module", "module_judul", "module_deskripsi"]}
+        fields={[
+          "id_kelas",
+          "id_mapel",
+          "module",
+          "module_judul",
+          "module_deskripsi",
+        ]}
         detailData={mapelDetail}
         editData={editModule}
       />

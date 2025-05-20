@@ -44,101 +44,6 @@ export default function Login() {
     }
   }, [email])
 
-  // const handleContinueWithRole = async (e) => {
-  //   e.preventDefault();
-
-  //   if (!role) {
-  //     setError("Silakan pilih role terlebih dahulu");
-  //     return;
-  //   }
-
-  //   if (!email) {
-  //     setError("Silakan login dengan Google terlebih dahulu");
-  //     return;
-  //   }
-
-  //   setLoading(true);
-
-  //   try {
-  //     // In a real app, you would verify the role with your backend
-  //     // For now, we'll just store it in localStorage
-
-  //     const userData = {
-  //       email,
-  //       role,
-  //       // You might want to add the user's UID from Firebase here
-  //       uid: auth.currentUser?.uid || "",
-  //     };
-
-  //     localStorage.setItem("token", auth.currentUser?.uid || "");
-  //     localStorage.setItem("user_data", JSON.stringify(userData));
-
-  //     // Redirect based on role
-  //     if (role === "guru") {
-  //       navigate("/guru", { replace: true });
-  //     } else {
-  //       navigate("/", { replace: true });
-  //     }
-  //   } catch (error) {
-  //     console.error("Login error:", error);
-  //     setError("Login gagal, cek email dan role!");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // const handleContinueWithRole = async (e) => {
-  //   try {
-  //     setLoading(true);
-  //     setError("");
-  //     const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         email,
-  //         role,
-  //       }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (data.Message && data.Message.includes("Successfuly Login")) {
-  //       // Store tokens in localStorage
-  //       localStorage.setItem("access_token", data.Data.access_token);
-  //       localStorage.setItem("refresh_token", data.Data.refresh_token);
-
-  //       // Store user data
-  //       localStorage.setItem(
-  //         "user_data",
-  //         JSON.stringify({
-  //           email: data.Data.email,
-  //           nama: data.Data.nama,
-  //           role: data.Data.role,
-  //           jabatan: data.Data.jabatan,
-  //         })
-  //       );
-
-  //       // Redirect based on role
-  //       if (data.Data.role === "guru") {
-  //         navigate("/guru", { replace: true });
-  //       } else {
-  //         navigate("/", { replace: true });
-  //       }
-  //     } else {
-  //       setError(
-  //         data.Message || "Login failed. Please check your credentials."
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("API Login error:", error);
-  //     setError("Login failed. Please try again later.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleContinueWithRole = async (e) => {
     e.preventDefault()
 
@@ -182,18 +87,39 @@ export default function Login() {
         localStorage.setItem("access_token", data.Data.access_token)
         localStorage.setItem("refresh_token", data.Data.refresh_token)
 
-        // Store user data
-        // localStorage.setItem(
-        //   "user_data",
-        //   JSON.stringify({
-        //     email: data.Data.email,
-        //     nama: data.Data.nama,
-        //     role: data.Data.role,
-        //     imageProfile: data.Data.image_profile,
-        //     jabatan: data.Data.jabatan,
-        //   }),
-        // )
         localStorage.setItem("user_data", JSON.stringify(data.Data))
+      }
+
+      // If the user is a guru, fetch their subjects
+      if (role === "guru" && data.Data.id) {
+        try {
+          console.log("Fetching teacher subjects for ID:", data.Data.id)
+          const guruResponse = await fetch(
+            `${import.meta.env.VITE_API_URL}/guru/${data.Data.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${data.Data.access_token}`,
+              },
+            },
+          )
+
+          if (guruResponse.ok) {
+            console.log("Teacher data received:", guruData)
+            const guruData = await guruResponse.json()
+            if (guruData && Array.isArray(guruData.mapel)) {
+              // Store teacher's subjects in localStorage
+              localStorage.setItem("guru_mapel", JSON.stringify(guruData.mapel))
+              console.log("Stored teacher subjects:", guruData.mapel)
+            }
+          } else {
+            console.error(
+              "Failed to fetch teacher subjects:",
+              guruResponse.status,
+            )
+          }
+        } catch (error) {
+          console.error("Error fetching teacher subjects:", error)
+        }
       }
       // Redirect based on role
       if (role === "guru") {
@@ -236,7 +162,9 @@ export default function Login() {
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="relative z-20 flex flex-col justify-center items-start p-12 text-white h-full">
-          <h1 className="text-4xl font-bold mb-4">LMS SD Negeri 8 Metro Pusat</h1>
+          <h1 className="text-4xl font-bold mb-4">
+            LMS SD Negeri 8 Metro Pusat
+          </h1>
           <p className="text-xl opacity-90 max-w-md">
             Platform manajemen pembelajaran untuk meningkatkan kualitas
             pendidikan
