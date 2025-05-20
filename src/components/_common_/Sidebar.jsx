@@ -25,6 +25,7 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
   const [unreadCount, setUnreadCount] = useState(0)
   const [userData, setUserData] = useState(null)
   const navigate = useNavigate()
+  const [teacherSubjects, setTeacherSubjects] = useState([])
 
   useEffect(() => {
     const data = localStorage.getItem("user_data")
@@ -114,9 +115,13 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
     },
     {
       path: "/mapel",
-      label: "Mata Pelajaran",
+      label: userRole === "guru" ? "Mata Pelajaran Saya" : "Mata Pelajaran",
       icon: Book,
       roles: ["admin", "guru"],
+      // badge:
+      //   userRole === "guru" && teacherSubjects.length > 0
+      //     ? teacherSubjects.length
+      //     : null,
     },
     {
       label: "Student Performance",
