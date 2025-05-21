@@ -130,6 +130,22 @@ export default function ImportModule() {
       console.log(data)
 
       setParsedData(data)
+      // Set jenis to "pilihan_ganda" for all questions and handle column shift
+      const processedData = data.map((subject) => ({
+        ...subject,
+        module: subject.module.map((module) => ({
+          ...module,
+          soal: module.soal.map((question) => ({
+            ...question,
+            // Set jenis to "pilihan_ganda" for all questions
+            jenis: "pilihan_ganda",
+          })),
+        })),
+      }))
+
+      console.log("Processed data:", processedData)
+      setParsedData(processedData)
+      console.log("Original data:", data)
 
       // Initialize expanded states for modules
       const moduleStates = {}
@@ -815,9 +831,10 @@ export default function ImportModule() {
                                         <span className="font-medium mr-1">
                                           Type:
                                         </span>
-                                        {question.jenis === "PG"
+                                        {/* {question.jenis === "PG"
                                           ? "Multiple Choice"
-                                          : question.jenis}
+                                          : question.jenis} */}
+                                        Pilihan Ganda
                                       </div>
                                     </div>
                                   )}
@@ -863,6 +880,17 @@ export default function ImportModule() {
                       <li>Delete subjects, modules, or individual questions</li>
                       <li>A confirmation dialog will appear before deletion</li>
                       <li>Deletions cannot be undone after saving</li>
+                    </ul>
+                    <p className="mt-2 mb-1">Important notes:</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>
+                        All questions are automatically set to "Multiple Choice"
+                        type
+                      </li>
+                      <li>
+                        The "jenis" column has been removed from the Excel
+                        template
+                      </li>
                     </ul>
                   </div>
                 </div>
