@@ -23,7 +23,7 @@ export default function Login() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    console.log(import.meta.env.VITE_API_URL)
+    console.log(window.env.VITE_API_URL)
     // Handle redirect result
     getRedirectResult(auth)
       .then((result) => {
@@ -63,7 +63,7 @@ export default function Login() {
       // In a real app, you would verify the role with your backend
       // For now, we'll just store it in localStorage
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
+      const response = await fetch(`${window.env.VITE_API_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -95,7 +95,7 @@ export default function Login() {
         try {
           console.log("Fetching teacher subjects for ID:", data.Data.id)
           const guruResponse = await fetch(
-            `${import.meta.env.VITE_API_URL}/guru/${data.Data.id}`,
+            `${window.env.VITE_API_URL}/guru/${data.Data.id}`,
             {
               headers: {
                 Authorization: `Bearer ${data.Data.access_token}`,

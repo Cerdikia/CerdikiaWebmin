@@ -13,7 +13,7 @@ const RedemptionReceipt = () => {
   const [receipt, setReceipt] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const baseUrl = import.meta.env.VITE_API_URL
+  const baseUrl = window.env.VITE_API_URL
 
   useEffect(() => {
     const fetchReceipt = async () => {

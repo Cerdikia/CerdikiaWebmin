@@ -79,7 +79,7 @@ export default function UserForm() {
     if (role === "siswa") {
       setLoadingClasses(true)
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/kelas`, {
+        const response = await fetch(`${window.env.VITE_API_URL}/kelas`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
@@ -105,7 +105,7 @@ export default function UserForm() {
       setLoadingSubjects(true)
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/genericAllMapels`,
+          `${window.env.VITE_API_URL}/genericAllMapels`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -136,7 +136,7 @@ export default function UserForm() {
     if (role === "guru" && teacherId) {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/guru/${teacherId}`,
+          `${window.env.VITE_API_URL}/guru/${teacherId}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -235,7 +235,7 @@ export default function UserForm() {
 
     try {
       let response = await fetch(
-        `${import.meta.env.VITE_API_URL}/actor/${role}/${id}`,
+        `${window.env.VITE_API_URL}/actor/${role}/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -247,7 +247,7 @@ export default function UserForm() {
         const refreshed = await RefreshToken()
         if (refreshed) {
           response = await fetch(
-            `${import.meta.env.VITE_API_URL}/actor/${role}/${id}`,
+            `${window.env.VITE_API_URL}/actor/${role}/${id}`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -375,7 +375,7 @@ export default function UserForm() {
       formDataImage.append("image", imageFile)
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/patchImageProfile/${role}/${email}`,
+        `${window.env.VITE_API_URL}/patchImageProfile/${role}/${email}`,
         {
           method: "PATCH",
           headers: {
@@ -403,7 +403,7 @@ export default function UserForm() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/guru_mapel/batch`,
+        `${window.env.VITE_API_URL}/guru_mapel/batch`,
         {
           method: "DELETE",
           headers: {
@@ -453,7 +453,7 @@ export default function UserForm() {
       // If in edit mode, use batch update to replace all subjects
       if (isEditMode) {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/guru_mapel/batch`,
+          `${window.env.VITE_API_URL}/guru_mapel/batch`,
           {
             method: "PUT",
             headers: {
@@ -480,7 +480,7 @@ export default function UserForm() {
         if (selectedSubjects.length === 0) return true
 
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/guru_mapel/batch`,
+          `${window.env.VITE_API_URL}/guru_mapel/batch`,
           {
             method: "POST",
             headers: {
@@ -521,7 +521,7 @@ export default function UserForm() {
 
   //   try {
   //     const response = await fetch(
-  //       `${import.meta.env.VITE_API_URL}/guru_mapel/batch`,
+  //       `${window.env.VITE_API_URL}/guru_mapel/batch`,
   //       {
   //         method: "DELETE",
   //         headers: {
@@ -560,7 +560,7 @@ export default function UserForm() {
       if (isEditMode && role !== roleFromState) {
         // Call the changeUserRole endpoint
         const roleChangeResponse = await fetch(
-          `${import.meta.env.VITE_API_URL}/changeUserRole`,
+          `${window.env.VITE_API_URL}/changeUserRole`,
           {
             method: "POST",
             headers: {
@@ -591,7 +591,7 @@ export default function UserForm() {
         // This ensures we have the right data format for the new role
         try {
           const userResponse = await fetch(
-            `${import.meta.env.VITE_API_URL}/getDataUser?email=${formData.email}`,
+            `${window.env.VITE_API_URL}/getDataUser?email=${formData.email}`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -644,7 +644,7 @@ export default function UserForm() {
         // Update user data with the new role-specific data
         try {
           const updateResponse = await fetch(
-            `${import.meta.env.VITE_API_URL}/editDataUser/${role}`,
+            `${window.env.VITE_API_URL}/editDataUser/${role}`,
             {
               method: "PUT",
               headers: {
@@ -717,7 +717,7 @@ export default function UserForm() {
           }
 
           const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/editDataUser/${roleFromState}`,
+            `${window.env.VITE_API_URL}/editDataUser/${roleFromState}`,
             {
               method: "PUT",
               headers: {
@@ -771,7 +771,7 @@ export default function UserForm() {
         }
 
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/register/${role}`,
+          `${window.env.VITE_API_URL}/register/${role}`,
           {
             method: "POST",
             headers: {
@@ -793,7 +793,7 @@ export default function UserForm() {
         if (role === "guru") {
           try {
             const teacherResponse = await fetch(
-              `${import.meta.env.VITE_API_URL}/getDataUser?email=${formData.email}`,
+              `${window.env.VITE_API_URL}/getDataUser?email=${formData.email}`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem("access_token")}`,

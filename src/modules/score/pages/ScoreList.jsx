@@ -33,7 +33,7 @@ export default function ScoreList() {
   // Fetch classes for the filter dropdown
   const fetchClasses = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/kelas`, {
+      const response = await fetch(`${window.env.VITE_API_URL}/kelas`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -57,7 +57,7 @@ export default function ScoreList() {
   const fetchSubjects = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/genericAllMapels`,
+        `${window.env.VITE_API_URL}/genericAllMapels`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -82,26 +82,20 @@ export default function ScoreList() {
     setError(null)
 
     try {
-      let response = await fetch(
-        `${import.meta.env.VITE_API_URL}/gegeralLogs`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
+      let response = await fetch(`${window.env.VITE_API_URL}/gegeralLogs`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
-      )
+      })
 
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(
-            `${import.meta.env.VITE_API_URL}/gegeralLogs`,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-              },
+          response = await fetch(`${window.env.VITE_API_URL}/gegeralLogs`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
-          )
+          })
         } else {
           navigate("/login", { replace: true })
           return

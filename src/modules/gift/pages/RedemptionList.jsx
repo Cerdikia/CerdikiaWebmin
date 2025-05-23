@@ -40,7 +40,7 @@ export default function RedemptionList() {
   const fetchRedemptions = async () => {
     try {
       setLoading(true)
-      let url = `${import.meta.env.VITE_API_URL}/redemptions`
+      let url = `${window.env.VITE_API_URL}/redemptions`
 
       // Add query parameters if filters are set
       const params = new URLSearchParams()
@@ -114,7 +114,7 @@ export default function RedemptionList() {
   const handleUpdateStatus = async (id, newStatus) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/redemptions/${id}/status`,
+        `${window.env.VITE_API_URL}/redemptions/${id}/status`,
         {
           method: "PUT",
           headers: {
@@ -158,7 +158,7 @@ export default function RedemptionList() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/redemptions/${id}`,
+        `${window.env.VITE_API_URL}/redemptions/${id}`,
         {
           method: "DELETE",
           headers: {

@@ -38,7 +38,7 @@ export default function MapelModal({
     if (kelasId) formData.id_kelas = Number.parseInt(kelasId)
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/${endpoint}`, {
+      const response = await fetch(`${window.env.VITE_API_URL}/${endpoint}`, {
         method: method,
         headers: {
           "Content-Type": "application/json",
@@ -79,7 +79,10 @@ export default function MapelModal({
   if (!isOpen) return null
 
   return (
-    <div onClick={onClose} className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
+    >
       <div
         onClick={handleModalClick}
         className="bg-white rounded-xl shadow-lg w-full max-w-md transform transition-all duration-300"
@@ -91,7 +94,10 @@ export default function MapelModal({
               {editData ? "Edit Mata Pelajaran" : "Tambah Mata Pelajaran"}
             </h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-500 focus:outline-none">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-500 focus:outline-none"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -115,7 +121,9 @@ export default function MapelModal({
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Kelas
+              </label>
               <select
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 value={kelasId}
@@ -123,12 +131,17 @@ export default function MapelModal({
               >
                 <option value="">Semua Kelas</option>
                 {kelasList.map((kelas) => (
-                  <option key={kelas.id_kelas} value={kelas.id_kelas.toString()}>
+                  <option
+                    key={kelas.id_kelas}
+                    value={kelas.id_kelas.toString()}
+                  >
                     {kelas.kelas}
                   </option>
                 ))}
               </select>
-              <p className="mt-1 text-xs text-gray-500">Opsional. Pilih kelas untuk mata pelajaran ini.</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Opsional. Pilih kelas untuk mata pelajaran ini.
+              </p>
             </div>
           </div>
 

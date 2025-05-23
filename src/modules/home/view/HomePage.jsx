@@ -79,7 +79,7 @@ export default function HomePage() {
     try {
       setActivitiesLoading(true)
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/recent-activities?page=1&limit=7`,
+        `${window.env.VITE_API_URL}/recent-activities?page=1&limit=7`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -120,7 +120,7 @@ export default function HomePage() {
     try {
       setChartLoading(true)
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/logs-periode?periode=${period}`,
+        `${window.env.VITE_API_URL}/logs-periode?periode=${period}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -261,7 +261,7 @@ export default function HomePage() {
         // =============== Fetch User Data ========================
         // Fetch real user data from the API
         const getAllUsersResponse = await fetch(
-          `${import.meta.env.VITE_API_URL}/all-stats`,
+          `${window.env.VITE_API_URL}/all-stats`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,

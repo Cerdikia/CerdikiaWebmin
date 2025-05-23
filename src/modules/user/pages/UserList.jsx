@@ -49,24 +49,18 @@ export default function UserList() {
     setError(null)
 
     try {
-      let response = await fetch(
-        `${import.meta.env.VITE_API_URL}/getAllUsers`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
+      let response = await fetch(`${window.env.VITE_API_URL}/getAllUsers`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
       )
 
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(
-            `${import.meta.env.VITE_API_URL}/getAllUsers`,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-              },
+          response = await fetch(`${window.env.VITE_API_URL}/getAllUsers`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
           )
         } else {
@@ -124,7 +118,7 @@ export default function UserList() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/deleteDataUser`,
+        `${window.env.VITE_API_URL}/deleteDataUser`,
         {
           method: "DELETE",
           headers: {
