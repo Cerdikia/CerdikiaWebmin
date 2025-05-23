@@ -113,7 +113,7 @@ export default function ImportModule() {
       const formData = new FormData()
       formData.append("file", file)
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/import`, {
+      const response = await fetch(`${window.env.VITE_API_URL}/import`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -241,7 +241,7 @@ export default function ImportModule() {
     try {
       // Send the data to a new API endpoint for saving
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/save-imported-data`,
+        `${window.env.VITE_API_URL}/save-imported-data`,
         {
           method: "POST",
           headers: {

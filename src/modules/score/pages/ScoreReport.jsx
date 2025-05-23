@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Download, Filter, Search, RefreshCw } from "lucide-react"
 import FetchData from "../../../components/_common_/FetchData"
-import FetchAllKelas from "../../../components/_common_/FetchAllKelas"
 import * as XLSX from "xlsx"
 
 export default function ScoreReport() {
@@ -28,7 +27,7 @@ export default function ScoreReport() {
       try {
         const token = localStorage.getItem("access_token")
         const response = await FetchData({
-          url: `${import.meta.env.VITE_API_URL}/kelas`,
+          url: `${window.env.VITE_API_URL}/kelas`,
           method: "GET",
           token,
         })
@@ -52,7 +51,7 @@ export default function ScoreReport() {
       try {
         const token = localStorage.getItem("access_token")
         const response = await FetchData({
-          url: `${import.meta.env.VITE_API_URL}/genericAllMapels`,
+          url: `${window.env.VITE_API_URL}/genericAllMapels`,
           method: "GET",
           token,
         })
@@ -86,7 +85,7 @@ export default function ScoreReport() {
         queryParams.append("aggregate_by", filters.aggregate_by)
 
       const response = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/all-students-report?${queryParams.toString()}`,
+        url: `${window.env.VITE_API_URL}/all-students-report?${queryParams.toString()}`,
         method: "GET",
         token,
       })
@@ -97,7 +96,7 @@ export default function ScoreReport() {
 
       // Fetch summary data
       const summaryResponse = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/score-report-summary?${queryParams.toString()}`,
+        url: `${window.env.VITE_API_URL}/score-report-summary?${queryParams.toString()}`,
         method: "GET",
         token,
       })
@@ -165,7 +164,7 @@ export default function ScoreReport() {
         queryParams.append("aggregate_by", filters.aggregate_by)
 
       const response = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/all-students-report?${queryParams.toString()}`,
+        url: `${window.env.VITE_API_URL}/all-students-report?${queryParams.toString()}`,
         method: "GET",
         token,
       })

@@ -63,7 +63,7 @@ export default function AdminPage() {
   // Fetch kelas data for filtering
   const fetchKelasData = async () => {
     try {
-      let response = await fetch(`${import.meta.env.VITE_API_URL}/kelas`, {
+      let response = await fetch(`${window.env.VITE_API_URL}/kelas`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -72,7 +72,7 @@ export default function AdminPage() {
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(`${import.meta.env.VITE_API_URL}/kelas`, {
+          response = await fetch(`${window.env.VITE_API_URL}/kelas`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
@@ -98,8 +98,8 @@ export default function AdminPage() {
       // Use genericAllMapels for "all" and genericMapels with id_kelas for specific class
       const url =
         selectedKelas === "all"
-          ? `${import.meta.env.VITE_API_URL}/genericAllMapels`
-          : `${import.meta.env.VITE_API_URL}/genericMapels?id_kelas=${selectedKelas}`
+          ? `${window.env.VITE_API_URL}/genericAllMapels`
+          : `${window.env.VITE_API_URL}/genericMapels?id_kelas=${selectedKelas}`
 
       let response = await fetch(url, {
         headers: {
@@ -243,7 +243,7 @@ export default function AdminPage() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/genericMapels/${deleteMapel.id_mapel}`,
+        `${window.env.VITE_API_URL}/genericMapels/${deleteMapel.id_mapel}`,
         {
           method: "DELETE",
           headers: {

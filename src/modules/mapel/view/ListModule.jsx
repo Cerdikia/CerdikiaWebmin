@@ -56,7 +56,7 @@ export default function ListModule() {
   const getKelas = async () => {
     try {
       const data = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/kelas`,
+        url: `${window.env.VITE_API_URL}/kelas`,
         token: localStorage.getItem("access_token"),
       })
       setKelasList(data)
@@ -68,7 +68,7 @@ export default function ListModule() {
   const getMataPelajaran = async (id_mapel) => {
     try {
       const data = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/genericMapel/${id_mapel}`,
+        url: `${window.env.VITE_API_URL}/genericMapel/${id_mapel}`,
         token: localStorage.getItem("access_token"),
       })
 
@@ -87,7 +87,7 @@ export default function ListModule() {
     try {
       setLoading(true)
       let response = await fetch(
-        `${import.meta.env.VITE_API_URL}/genericModules?id_mapel=${id}`,
+        `${window.env.VITE_API_URL}/genericModules?id_mapel=${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -99,7 +99,7 @@ export default function ListModule() {
         const refreshed = await RefreshToken()
         if (refreshed) {
           response = await fetch(
-            `${import.meta.env.VITE_API_URL}/genericModules?id_mapel=${id}`,
+            `${window.env.VITE_API_URL}/genericModules?id_mapel=${id}`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -224,7 +224,7 @@ export default function ListModule() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/genericModules/${deleteModule.id_module}`,
+        `${window.env.VITE_API_URL}/genericModules/${deleteModule.id_module}`,
         {
           method: "DELETE",
           headers: {
@@ -260,7 +260,7 @@ export default function ListModule() {
       setToggleLoading(module.id_module)
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/togle-module/${module.id_module}`,
+        `${window.env.VITE_API_URL}/togle-module/${module.id_module}`,
         {
           method: "PUT",
           headers: {

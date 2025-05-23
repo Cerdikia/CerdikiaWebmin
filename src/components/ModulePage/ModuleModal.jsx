@@ -48,10 +48,11 @@ export default function ModuleModal({
     if (fields.includes("id_mapel")) formData.id_mapel = detailData.value
     if (fields.includes("module")) formData.module = module
     if (fields.includes("module_judul")) formData.module_judul = module_judul
-    if (fields.includes("module_deskripsi")) formData.module_deskripsi = module_deskripsi
+    if (fields.includes("module_deskripsi"))
+      formData.module_deskripsi = module_deskripsi
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/${endpoint}`, {
+      const response = await fetch(`${window.env.VITE_API_URL}/${endpoint}`, {
         method: method,
         headers: {
           "Content-Type": "application/json",
@@ -98,7 +99,10 @@ export default function ModuleModal({
   if (!isOpen) return null
 
   return (
-    <div onClick={onClose} className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
+    >
       <div
         onClick={handleModalClick}
         className="bg-white rounded-xl shadow-lg w-full max-w-md transform transition-all duration-300"
@@ -106,9 +110,14 @@ export default function ModuleModal({
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div className="flex items-center">
             <FileText className="w-5 h-5 text-indigo-600 mr-3" />
-            <h2 className="text-xl font-bold text-gray-900">{editData ? "Edit Modul" : "Tambah Modul"}</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              {editData ? "Edit Modul" : "Tambah Modul"}
+            </h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-500 focus:outline-none">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-500 focus:outline-none"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -117,7 +126,9 @@ export default function ModuleModal({
           <div className="space-y-4">
             {showField("id_mapel") && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{detailData.title}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {detailData.title}
+                </label>
                 <input
                   type="text"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"

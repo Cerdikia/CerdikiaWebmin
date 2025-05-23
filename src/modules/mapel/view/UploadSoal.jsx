@@ -6,7 +6,16 @@ import { useNavigate } from "react-router-dom"
 import ReactQuill from "react-quill"
 import Quill from "quill"
 import "react-quill/dist/quill.snow.css"
-import { ArrowLeft, Save, Loader2, HelpCircle, ImageIcon, Check, AlertTriangle, FileText } from "lucide-react"
+import {
+  ArrowLeft,
+  Save,
+  Loader2,
+  HelpCircle,
+  ImageIcon,
+  Check,
+  AlertTriangle,
+  FileText,
+} from "lucide-react"
 // Import and register resize image module
 import ResizeImage from "quill-resize-image"
 Quill.register("modules/resizeImage", ResizeImage)
@@ -81,13 +90,16 @@ export default function UploadSoal() {
         const formData = new FormData()
         formData.append("image", file)
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/upload-image`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        const response = await fetch(
+          `${window.env.VITE_API_URL}/upload-image`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+            body: formData,
           },
-          body: formData,
-        })
+        )
 
         const data = await response.json()
 
@@ -96,7 +108,11 @@ export default function UploadSoal() {
           quill.deleteText(insertIndex, 1)
 
           // Insert the actual image
-          quill.insertEmbed(range ? range.index : quill.getLength(), "image", data.Data.url)
+          quill.insertEmbed(
+            range ? range.index : quill.getLength(),
+            "image",
+            data.Data.url,
+          )
         } else {
           // Delete the loading image if upload failed
           quill.deleteText(insertIndex, 1)
@@ -131,7 +147,7 @@ export default function UploadSoal() {
       setError(null)
       setSuccess(null)
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/upload-soal`, {
+      const response = await fetch(`${window.env.VITE_API_URL}/upload-soal`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -190,7 +206,9 @@ export default function UploadSoal() {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Add New Question</h1>
-          <p className="text-gray-500 text-sm mt-1">Create a new multiple choice question</p>
+          <p className="text-gray-500 text-sm mt-1">
+            Create a new multiple choice question
+          </p>
         </div>
       </div>
 
@@ -216,7 +234,9 @@ export default function UploadSoal() {
             <div className="mb-4">
               <div className="flex items-center mb-2">
                 <FileText className="w-5 h-5 text-indigo-600 mr-2" />
-                <label className="block text-lg font-medium text-gray-700">Question Content</label>
+                <label className="block text-lg font-medium text-gray-700">
+                  Question Content
+                </label>
               </div>
               <div className="border rounded-lg border-gray-300 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500">
                 <ReactQuill
@@ -248,7 +268,10 @@ export default function UploadSoal() {
                   onChange={(e) => setSelectedJawaban(e.target.value)}
                   className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                 />
-                <label htmlFor="jawaban-a" className="ml-2 block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="jawaban-a"
+                  className="ml-2 block text-sm font-medium text-gray-700"
+                >
                   Option A <span className="text-red-500">*</span>
                 </label>
               </div>
@@ -275,7 +298,10 @@ export default function UploadSoal() {
                   onChange={(e) => setSelectedJawaban(e.target.value)}
                   className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                 />
-                <label htmlFor="jawaban-b" className="ml-2 block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="jawaban-b"
+                  className="ml-2 block text-sm font-medium text-gray-700"
+                >
                   Option B <span className="text-red-500">*</span>
                 </label>
               </div>
@@ -304,7 +330,10 @@ export default function UploadSoal() {
                   onChange={(e) => setSelectedJawaban(e.target.value)}
                   className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                 />
-                <label htmlFor="jawaban-c" className="ml-2 block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="jawaban-c"
+                  className="ml-2 block text-sm font-medium text-gray-700"
+                >
                   Option C <span className="text-red-500">*</span>
                 </label>
               </div>
@@ -331,7 +360,10 @@ export default function UploadSoal() {
                   onChange={(e) => setSelectedJawaban(e.target.value)}
                   className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                 />
-                <label htmlFor="jawaban-d" className="ml-2 block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="jawaban-d"
+                  className="ml-2 block text-sm font-medium text-gray-700"
+                >
                   Option D <span className="text-red-500">*</span>
                 </label>
               </div>
@@ -355,11 +387,13 @@ export default function UploadSoal() {
                   <HelpCircle className="h-5 w-5 text-indigo-600" />
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-indigo-800">Correct Answer</h3>
+                  <h3 className="text-sm font-medium text-indigo-800">
+                    Correct Answer
+                  </h3>
                   <div className="mt-2 text-sm text-indigo-700">
                     <p>
-                      Select the radio button next to the correct option. The selected option will be marked as the
-                      correct answer.
+                      Select the radio button next to the correct option. The
+                      selected option will be marked as the correct answer.
                     </p>
                   </div>
                 </div>
@@ -369,7 +403,9 @@ export default function UploadSoal() {
             <div className="flex items-center justify-between mt-6">
               <div className="flex items-center text-sm text-gray-500">
                 <ImageIcon className="w-4 h-4 mr-1" />
-                <span>Click the image icon in the toolbar to upload images</span>
+                <span>
+                  Click the image icon in the toolbar to upload images
+                </span>
               </div>
               <div className="flex space-x-3">
                 <button

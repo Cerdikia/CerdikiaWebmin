@@ -23,7 +23,7 @@ const MessageList = () => {
     try {
       const token = localStorage.getItem("access_token")
       const response = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/messages`,
+        url: `${window.env.VITE_API_URL}/messages`,
         method: "GET",
         token,
       })
@@ -47,7 +47,7 @@ const MessageList = () => {
   //   try {
   //     const token = localStorage.getItem("token")
   //     await FetchData({
-  //       url: `${import.meta.env.VITE_API_URL}/api/messages/${messageId}/status`,
+  //       url: `${window.env.VITE_API_URL}/api/messages/${messageId}/status`,
   //       method: "PUT",
   //       token,
   //       body: { status: "dibaca" },

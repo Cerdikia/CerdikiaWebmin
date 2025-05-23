@@ -38,7 +38,7 @@ export default function GiftList() {
   const fetchGifts = async () => {
     try {
       setLoading(true)
-      let response = await fetch(`${import.meta.env.VITE_API_URL}/gifts`, {
+      let response = await fetch(`${window.env.VITE_API_URL}/gifts`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -47,7 +47,7 @@ export default function GiftList() {
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(`${import.meta.env.VITE_API_URL}/gifts`, {
+          response = await fetch(`${window.env.VITE_API_URL}/gifts`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
@@ -101,7 +101,7 @@ export default function GiftList() {
       // const response = await fetch(
       //   `${import.meta.env.VITE_API_URL}/gifts/${id}`,{
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/gifts/${giftToDelete.id_barang}`,
+        `${window.env.VITE_API_URL}/gifts/${giftToDelete.id_barang}`,
         {
           method: "DELETE",
           headers: {

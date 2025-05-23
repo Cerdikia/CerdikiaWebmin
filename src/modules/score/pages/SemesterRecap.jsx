@@ -106,7 +106,7 @@ export default function SemesterRecap() {
     try {
       const token = localStorage.getItem("access_token")
       const response = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/rekap-semester-all`,
+        url: `${window.env.VITE_API_URL}/rekap-semester-all`,
         method: "GET",
         token,
       })
@@ -127,7 +127,7 @@ export default function SemesterRecap() {
     try {
       const token = localStorage.getItem("access_token")
       const response = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/kelas`,
+        url: `${window.env.VITE_API_URL}/kelas`,
         method: "GET",
         token,
       })
@@ -144,7 +144,7 @@ export default function SemesterRecap() {
     try {
       const token = localStorage.getItem("access_token")
       const response = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/genericAllMapels`,
+        url: `${window.env.VITE_API_URL}/genericAllMapels`,
         method: "GET",
         token,
       })
@@ -211,8 +211,8 @@ export default function SemesterRecap() {
       if (createForm.filter_mapel)
         requestBody.id_mapel = createForm.filter_mapel
       const response = await FetchData({
-        // url: `${import.meta.env.VITE_API_URL}/rekap-semester`,
-        url: `${import.meta.env.VITE_API_URL}${endpoint}`,
+        // url: `${window.env.VITE_API_URL}/rekap-semester`,
+        url: `${window.env.VITE_API_URL}${endpoint}`,
         method: "POST",
         token,
         // body: createForm,
@@ -277,7 +277,7 @@ export default function SemesterRecap() {
 
       const token = localStorage.getItem("access_token")
       const response = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/edit-tahun-ajaran`,
+        url: `${window.env.VITE_API_URL}/edit-tahun-ajaran`,
         method: "POST",
         token,
         body: editForm,
@@ -314,7 +314,7 @@ export default function SemesterRecap() {
     try {
       const token = localStorage.getItem("access_token")
       const response = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/rekap-semester/${selectedData.id_data}`,
+        url: `${window.env.VITE_API_URL}/rekap-semester/${selectedData.id_data}`,
         method: "DELETE",
         token,
       })

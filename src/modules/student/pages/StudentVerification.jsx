@@ -53,7 +53,7 @@ export default function StudentVerification() {
   const fetchStudents = async () => {
     try {
       setLoading(true)
-      let response = await fetch(`${import.meta.env.VITE_API_URL}/verifiedes`, {
+      let response = await fetch(`${window.env.VITE_API_URL}/verifiedes`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -62,7 +62,7 @@ export default function StudentVerification() {
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(`${import.meta.env.VITE_API_URL}/verifiedes`, {
+          response = await fetch(`${window.env.VITE_API_URL}/verifiedes`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
@@ -212,7 +212,7 @@ export default function StudentVerification() {
 
       // Send verification status updates
       const verificationResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/verifiedes`,
+        `${window.env.VITE_API_URL}/verifiedes`,
         {
           method: "PATCH",
           headers: {
@@ -229,7 +229,7 @@ export default function StudentVerification() {
 
       // Send notification messages
       const messageResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/messages`,
+        `${window.env.VITE_API_URL}/messages`,
         {
           method: "POST",
           headers: {
