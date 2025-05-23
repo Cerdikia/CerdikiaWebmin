@@ -47,7 +47,7 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
     try {
       const token = localStorage.getItem("access_token")
       const response = await FetchData({
-        url: `${import.meta.env.VITE_API_URL}/messages/unread/count/all`,
+        url: `${window.env.VITE_API_URL}/messages/unread/count/all`,
         method: "GET",
         token,
       })

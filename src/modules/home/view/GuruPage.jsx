@@ -1,8 +1,30 @@
 // components/StudentCharts.jsx
-import React from "react";
+// import React from "react";
+// import {
+//   Line,
+//   Doughnut,
+//   Chart as ChartJS,
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   LineElement,
+//   ArcElement,
+//   Tooltip,
+//   Legend,
+// } from "chart.js";
+
+// ChartJS.register(
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   LineElement,
+//   ArcElement,
+//   Tooltip,
+//   Legend
+// );
+
+// ✅ Correct way
 import {
-  Line,
-  Doughnut,
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
@@ -11,8 +33,11 @@ import {
   ArcElement,
   Tooltip,
   Legend,
-} from "chart.js";
+} from "chart.js"
 
+import { Line, Doughnut } from "react-chartjs-2"
+
+// Register chart components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -20,8 +45,8 @@ ChartJS.register(
   LineElement,
   ArcElement,
   Tooltip,
-  Legend
-);
+  Legend,
+)
 
 const StudentCharts = () => {
   const lineData = {
@@ -36,7 +61,7 @@ const StudentCharts = () => {
         tension: 0.3,
       },
     ],
-  };
+  }
 
   const doughnutData = {
     labels: ["Hadir", "Tidak Hadir", "gajelas"],
@@ -47,10 +72,10 @@ const StudentCharts = () => {
         hoverOffset: 4,
       },
     ],
-  };
+  }
 
   const chartContainerStyle =
-    "w-[90%] max-w-[700px] mx-auto my-10 bg-white p-6 rounded-2xl shadow-md";
+    "w-[90%] max-w-[700px] mx-auto my-10 bg-white p-6 rounded-2xl shadow-md"
 
   return (
     <div className="min-h-screen bg-[#f5f7fa] font-[Segoe UI] p-4">
@@ -68,7 +93,7 @@ const StudentCharts = () => {
         <Doughnut data={doughnutData} />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default StudentCharts;
+export default StudentCharts

@@ -2,7 +2,18 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, RefreshCw, Trophy, Medal, Award, Users, ChevronDown, ArrowUp, Star, Sparkles } from "lucide-react"
+import {
+  Search,
+  RefreshCw,
+  Trophy,
+  Medal,
+  Award,
+  Users,
+  ChevronDown,
+  ArrowUp,
+  Star,
+  Sparkles,
+} from "lucide-react"
 import RefreshToken from "../../../components/_common_/RefreshToken"
 
 export default function RankingPage() {
@@ -17,7 +28,7 @@ export default function RankingPage() {
   // Fetch classes for the filter dropdown
   const fetchClasses = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/kelas`, {
+      const response = await fetch(`${window.env.VITE_API_URL}/kelas`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -46,8 +57,8 @@ export default function RankingPage() {
     try {
       // Construct the URL with the class filter if selected
       const url = selectedClass
-        ? `${import.meta.env.VITE_API_URL}/ranking?id_kelas=${selectedClass}`
-        : `${import.meta.env.VITE_API_URL}/ranking`
+        ? `${window.env.VITE_API_URL}/ranking?id_kelas=${selectedClass}`
+        : `${window.env.VITE_API_URL}/ranking`
 
       let response = await fetch(url, {
         headers: {
@@ -97,7 +108,9 @@ export default function RankingPage() {
   }, [selectedClass])
 
   // Filter rankings by search term
-  const filteredRankings = rankings.filter((rank) => rank.nama?.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredRankings = rankings.filter((rank) =>
+    rank.nama?.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
 
   // Get top 3 students for the leaderboard
   const topThree = filteredRankings.slice(0, 3)
@@ -126,7 +139,11 @@ export default function RankingPage() {
       case 3:
         return <Award className="w-6 h-6 text-amber-600" />
       default:
-        return <span className="w-6 h-6 inline-flex items-center justify-center font-bold">{ranking}</span>
+        return (
+          <span className="w-6 h-6 inline-flex items-center justify-center font-bold">
+            {ranking}
+          </span>
+        )
     }
   }
 
@@ -134,8 +151,12 @@ export default function RankingPage() {
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Student Rankings</h1>
-          <p className="text-gray-500">View student rankings based on experience points</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Student Rankings
+          </h1>
+          <p className="text-gray-500">
+            View student rankings based on experience points
+          </p>
         </div>
         <button
           onClick={() => navigate("/scores")}
@@ -160,8 +181,12 @@ export default function RankingPage() {
                   <Medal className="w-8 h-8 text-gray-400" />
                 </div>
                 <div className="text-xl font-bold text-gray-400">#2</div>
-                <div className="text-lg font-semibold mt-2">{topThree[1].nama || "No Name"}</div>
-                <div className="text-sm text-gray-500 mt-1">Class {topThree[1].kelas}</div>
+                <div className="text-lg font-semibold mt-2">
+                  {topThree[1].nama || "No Name"}
+                </div>
+                <div className="text-sm text-gray-500 mt-1">
+                  Class {topThree[1].kelas}
+                </div>
                 <div className="mt-3 flex items-center">
                   <Sparkles className="w-4 h-4 text-gray-400 mr-1" />
                   <span className="font-bold">{topThree[1].exp} XP</span>
@@ -176,11 +201,17 @@ export default function RankingPage() {
                   <Trophy className="w-10 h-10 text-yellow-500" />
                 </div>
                 <div className="text-2xl font-bold text-yellow-500">#1</div>
-                <div className="text-xl font-semibold mt-2">{topThree[0].nama || "No Name"}</div>
-                <div className="text-sm text-gray-500 mt-1">Class {topThree[0].kelas}</div>
+                <div className="text-xl font-semibold mt-2">
+                  {topThree[0].nama || "No Name"}
+                </div>
+                <div className="text-sm text-gray-500 mt-1">
+                  Class {topThree[0].kelas}
+                </div>
                 <div className="mt-3 flex items-center">
                   <Sparkles className="w-5 h-5 text-yellow-500 mr-1" />
-                  <span className="font-bold text-lg">{topThree[0].exp} XP</span>
+                  <span className="font-bold text-lg">
+                    {topThree[0].exp} XP
+                  </span>
                 </div>
                 <div className="mt-2 px-3 py-1 bg-yellow-100 rounded-full text-xs font-medium text-yellow-700">
                   Top Student
@@ -195,8 +226,12 @@ export default function RankingPage() {
                   <Award className="w-8 h-8 text-amber-600" />
                 </div>
                 <div className="text-xl font-bold text-amber-600">#3</div>
-                <div className="text-lg font-semibold mt-2">{topThree[2].nama || "No Name"}</div>
-                <div className="text-sm text-gray-500 mt-1">Class {topThree[2].kelas}</div>
+                <div className="text-lg font-semibold mt-2">
+                  {topThree[2].nama || "No Name"}
+                </div>
+                <div className="text-sm text-gray-500 mt-1">
+                  Class {topThree[2].kelas}
+                </div>
                 <div className="mt-3 flex items-center">
                   <Sparkles className="w-4 h-4 text-amber-500 mr-1" />
                   <span className="font-bold">{topThree[2].exp} XP</span>
@@ -212,7 +247,10 @@ export default function RankingPage() {
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Search by student name..."
@@ -224,7 +262,10 @@ export default function RankingPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <div className="relative">
-              <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Users
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
@@ -295,7 +336,9 @@ export default function RankingPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="ml-0">
-                            <div className={`text-sm font-medium ${getRankColor(rank.ranking)}`}>
+                            <div
+                              className={`text-sm font-medium ${getRankColor(rank.ranking)}`}
+                            >
                               {rank.nama || "No Name"}
                             </div>
                           </div>
@@ -316,7 +359,10 @@ export default function RankingPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">
+                    <td
+                      colSpan="4"
+                      className="px-6 py-4 text-center text-sm text-gray-500"
+                    >
                       No rankings found
                     </td>
                   </tr>
@@ -339,7 +385,9 @@ export default function RankingPage() {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-gray-500">Top Score</p>
-                  <p className="text-xl font-bold">{filteredRankings[0]?.exp || 0} XP</p>
+                  <p className="text-xl font-bold">
+                    {filteredRankings[0]?.exp || 0} XP
+                  </p>
                 </div>
               </div>
             </div>
@@ -350,7 +398,9 @@ export default function RankingPage() {
                   <Users className="h-5 w-5 text-green-600" />
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-500">Total Students</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Students
+                  </p>
                   <p className="text-xl font-bold">{filteredRankings.length}</p>
                 </div>
               </div>
@@ -362,9 +412,16 @@ export default function RankingPage() {
                   <ArrowUp className="h-5 w-5 text-amber-600" />
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-500">Average XP</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Average XP
+                  </p>
                   <p className="text-xl font-bold">
-                    {Math.round(filteredRankings.reduce((sum, rank) => sum + rank.exp, 0) / filteredRankings.length)}
+                    {Math.round(
+                      filteredRankings.reduce(
+                        (sum, rank) => sum + rank.exp,
+                        0,
+                      ) / filteredRankings.length,
+                    )}
                   </p>
                 </div>
               </div>

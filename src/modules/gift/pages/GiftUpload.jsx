@@ -13,7 +13,11 @@ import RefreshToken from "../../../components/_common_/RefreshToken"
 import Notification from "../components/Notification"
 
 // Register FilePond plugins
-registerPlugin(FilePondPluginImagePreview, FilePondPluginFileValidateType, FilePondPluginImageExifOrientation)
+registerPlugin(
+  FilePondPluginImagePreview,
+  FilePondPluginFileValidateType,
+  FilePondPluginImageExifOrientation,
+)
 
 export default function GiftUpload() {
   const navigate = useNavigate()
@@ -43,7 +47,10 @@ export default function GiftUpload() {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "quantity" || name === "diamond_value" ? Number.parseInt(value) || 0 : value,
+      [name]:
+        name === "quantity" || name === "diamond_value"
+          ? Number.parseInt(value) || 0
+          : value,
     }))
   }
 
@@ -108,7 +115,7 @@ export default function GiftUpload() {
       apiFormData.append("image", resizedImage)
 
       // Make the API request
-      let response = await fetch(`${import.meta.env.VITE_API_URL}/gifts`, {
+      let response = await fetch(`${window.env.VITE_API_URL}/gifts`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -119,7 +126,7 @@ export default function GiftUpload() {
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(`${import.meta.env.VITE_API_URL}/gifts`, {
+          response = await fetch(`${window.env.VITE_API_URL}/gifts`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -170,7 +177,9 @@ export default function GiftUpload() {
     return (
       <div className="p-8 bg-red-50 rounded-xl border border-red-200">
         <h2 className="text-xl font-semibold text-red-700">Access Denied</h2>
-        <p className="mt-2 text-red-600">This page is only accessible to administrators.</p>
+        <p className="mt-2 text-red-600">
+          This page is only accessible to administrators.
+        </p>
       </div>
     )
   }
@@ -178,11 +187,18 @@ export default function GiftUpload() {
   return (
     <div className="container mx-auto p-4">
       {notification && (
-        <Notification type={notification.type} message={notification.message} onClose={() => setNotification(null)} />
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
       )}
 
       <div className="flex items-center mb-6">
-        <button onClick={() => navigate("/gifts")} className="mr-4 p-2 rounded-full hover:bg-gray-100">
+        <button
+          onClick={() => navigate("/gifts")}
+          className="mr-4 p-2 rounded-full hover:bg-gray-100"
+        >
           <ArrowLeft size={20} />
         </button>
         <h1 className="text-2xl font-bold">Upload New Gift</h1>
@@ -204,7 +220,10 @@ export default function GiftUpload() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Gift Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -220,7 +239,10 @@ export default function GiftUpload() {
             </div>
 
             <div>
-              <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="quantity"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Quantity <span className="text-red-500">*</span>
               </label>
               <input
@@ -236,11 +258,17 @@ export default function GiftUpload() {
             </div>
 
             <div>
-              <label htmlFor="diamond_value" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="diamond_value"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Diamond Value <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <Diamond size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
+                <Diamond
+                  size={18}
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500"
+                />
                 <input
                   type="number"
                   id="diamond_value"
@@ -255,7 +283,10 @@ export default function GiftUpload() {
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Description
               </label>
               <textarea
@@ -281,7 +312,12 @@ export default function GiftUpload() {
               maxFiles={1}
               name="image"
               labelIdle='Drag & Drop your image or <span class="filepond--label-action">Browse</span>'
-              acceptedFileTypes={["image/png", "image/jpeg", "image/jpg", "image/gif"]}
+              acceptedFileTypes={[
+                "image/png",
+                "image/jpeg",
+                "image/jpg",
+                "image/gif",
+              ]}
               stylePanelLayout="compact"
               imagePreviewHeight={200}
               imageCropAspectRatio="1:1"
@@ -290,7 +326,8 @@ export default function GiftUpload() {
               className="gift-upload-filepond"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Supported formats: JPG, PNG, GIF. Max file size: 5MB. Images will be resized to 86x86 pixels.
+              Supported formats: JPG, PNG, GIF. Max file size: 5MB. Images will
+              be resized to 86x86 pixels.
             </p>
           </div>
 

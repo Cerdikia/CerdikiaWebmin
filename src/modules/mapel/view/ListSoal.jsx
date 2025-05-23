@@ -3,7 +3,18 @@
 import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Book, Plus, Search, RefreshCw, ArrowLeft, FileText, Eye, Edit, Trash2, CheckCircle2 } from "lucide-react"
+import {
+  Book,
+  Plus,
+  Search,
+  RefreshCw,
+  ArrowLeft,
+  FileText,
+  Eye,
+  Edit,
+  Trash2,
+  CheckCircle2,
+} from "lucide-react"
 import RefreshToken from "../../../components/_common_/RefreshToken"
 import DeleteSoalModal from "../../../components/MapelPage/DeleteSoalModal"
 
@@ -25,11 +36,14 @@ export default function ListSoal() {
   // Fetch module details
   const fetchModuleDetail = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/genericModule/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      const response = await fetch(
+        `${window.env.VITE_API_URL}/genericModule/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         },
-      })
+      )
 
       if (response.ok) {
         const data = await response.json()
@@ -48,7 +62,7 @@ export default function ListSoal() {
     setError(null)
 
     try {
-      const apiUrl = `${import.meta.env.VITE_API_URL}/genericSoal/${id}`
+      const apiUrl = `${window.env.VITE_API_URL}/genericSoal/${id}`
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -76,7 +90,9 @@ export default function ListSoal() {
         // Calculate stats
         const stats = {
           total: data.Data.length,
-          pilihan_ganda: data.Data.filter((soal) => soal.jenis === "pilihan_ganda").length,
+          pilihan_ganda: data.Data.filter(
+            (soal) => soal.jenis === "pilihan_ganda",
+          ).length,
         }
         setStats(stats)
       } else if (data.Message === "no data found, maybe wrong in query") {
@@ -116,33 +132,39 @@ export default function ListSoal() {
   }
 
   const handleDeleteClick = (e, soal) => {
-  e.stopPropagation()
-  setDeleteSoal(soal)
-  setIsDeleteModalOpen(true)
+    e.stopPropagation()
+    setDeleteSoal(soal)
+    setIsDeleteModalOpen(true)
   }
 
   const handleConfirmDelete = async () => {
     if (!deleteSoal) return
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/deleteDataSoal/${deleteSoal.id_soal}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      const response = await fetch(
+        `${window.env.VITE_API_URL}/deleteDataSoal/${deleteSoal.id_soal}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         },
-      })
+      )
 
       const data = await response.json()
 
       if (data.Message && data.Message.includes("Delete soal success")) {
         // Remove from list
-        setSoalList((prev) => prev.filter((item) => item.id_soal !== deleteSoal.id_soal))
-        
+        setSoalList((prev) =>
+          prev.filter((item) => item.id_soal !== deleteSoal.id_soal),
+        )
+
         // Update stats if needed
         setStats((prev) => ({
           ...prev,
           total: prev.total - 1,
-          pilihan_ganda: prev.pilihan_ganda - (deleteSoal.jenis === "pilihan_ganda" ? 1 : 0),
+          pilihan_ganda:
+            prev.pilihan_ganda - (deleteSoal.jenis === "pilihan_ganda" ? 1 : 0),
         }))
       } else {
         alert("Failed to delete question")
@@ -170,7 +192,9 @@ export default function ListSoal() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Question List</h1>
           <p className="text-gray-500 text-sm mt-1">
-            {moduleDetail ? `Module: ${moduleDetail.module_judul}` : "Manage questions for this module"}
+            {moduleDetail
+              ? `Module: ${moduleDetail.module_judul}`
+              : "Manage questions for this module"}
           </p>
         </div>
       </div>
@@ -180,8 +204,12 @@ export default function ListSoal() {
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-gray-500">Total Questions</p>
-              <p className="text-3xl font-bold mt-2 text-gray-900">{stats.total}</p>
+              <p className="text-sm font-medium text-gray-500">
+                Total Questions
+              </p>
+              <p className="text-3xl font-bold mt-2 text-gray-900">
+                {stats.total}
+              </p>
             </div>
             <div className="p-3 rounded-lg bg-indigo-100">
               <FileText className="w-6 h-6 text-indigo-600" />
@@ -192,8 +220,12 @@ export default function ListSoal() {
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-gray-500">Multiple Choice</p>
-              <p className="text-3xl font-bold mt-2 text-gray-900">{stats.pilihan_ganda}</p>
+              <p className="text-sm font-medium text-gray-500">
+                Multiple Choice
+              </p>
+              <p className="text-3xl font-bold mt-2 text-gray-900">
+                {stats.pilihan_ganda}
+              </p>
             </div>
             <div className="p-3 rounded-lg bg-green-100">
               <CheckCircle2 className="w-6 h-6 text-green-600" />
@@ -208,7 +240,10 @@ export default function ListSoal() {
         <div className="p-6 border-b border-gray-100">
           <div className="flex flex-col md:flex-row gap-4 justify-between">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Search questions..."
@@ -250,7 +285,9 @@ export default function ListSoal() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    ID
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Question
                   </th>
@@ -273,7 +310,9 @@ export default function ListSoal() {
                       className="hover:bg-gray-50 cursor-pointer"
                       onClick={() => handleRowClick(soal.id_soal)}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{soal.id_soal}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {soal.id_soal}
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center">
@@ -282,7 +321,9 @@ export default function ListSoal() {
                           <div className="ml-4 max-w-md">
                             <div
                               className="text-sm text-gray-900 line-clamp-2"
-                              dangerouslySetInnerHTML={{ __html: truncateHtml(soal.soal) }}
+                              dangerouslySetInnerHTML={{
+                                __html: truncateHtml(soal.soal),
+                              }}
                             />
                           </div>
                         </div>
@@ -295,7 +336,9 @@ export default function ListSoal() {
                               : "bg-amber-100 text-amber-800"
                           }`}
                         >
-                          {soal.jenis === "pilihan_ganda" ? "Multiple Choice" : "Essay"}
+                          {soal.jenis === "pilihan_ganda"
+                            ? "Multiple Choice"
+                            : "Essay"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -306,7 +349,10 @@ export default function ListSoal() {
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
+                        <div
+                          className="flex justify-end space-x-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <button
                             className="text-blue-600 hover:text-blue-900 p-1 rounded-full hover:bg-blue-50"
                             onClick={(e) => {
@@ -337,11 +383,16 @@ export default function ListSoal() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-sm text-gray-500">
+                    <td
+                      colSpan="5"
+                      className="px-6 py-12 text-center text-sm text-gray-500"
+                    >
                       <div className="flex flex-col items-center">
                         <Book className="w-12 h-12 text-gray-300 mb-2" />
                         <p className="text-gray-500 mb-1">No questions found</p>
-                        <p className="text-gray-400 text-xs">Add questions to this module</p>
+                        <p className="text-gray-400 text-xs">
+                          Add questions to this module
+                        </p>
                       </div>
                     </td>
                   </tr>
@@ -354,19 +405,20 @@ export default function ListSoal() {
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            Showing <span className="font-medium">{filteredSoal.length}</span> questions
+            Showing <span className="font-medium">{filteredSoal.length}</span>{" "}
+            questions
           </div>
         </div>
       </div>
-      
+
       <DeleteSoalModal
-      isOpen={isDeleteModalOpen}
-      onClose={() => {
-        setIsDeleteModalOpen(false)
-        setDeleteSoal(null)
-      }}
-      onConfirm={handleConfirmDelete}
-      soal={deleteSoal}
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false)
+          setDeleteSoal(null)
+        }}
+        onConfirm={handleConfirmDelete}
+        soal={deleteSoal}
       />
     </div>
   )

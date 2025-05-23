@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from "react"
 
 export default function ListSoalModal({
   endpoint,
@@ -9,71 +9,71 @@ export default function ListSoalModal({
   fields = [],
   detailData = [],
 }) {
-  const [id_kelas, setid_kelas] = useState(0);
-  const [id_mapel, setid_mapel] = useState(detailData.value);
-  const [module, setmodule] = useState(0);
-  const [module_judul, setmodule_judul] = useState("");
-  const [module_deskripsi, setmodule_deskripsi] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [id_kelas, setid_kelas] = useState(0)
+  const [id_mapel, setid_mapel] = useState(detailData.value)
+  const [module, setmodule] = useState(0)
+  const [module_judul, setmodule_judul] = useState("")
+  const [module_deskripsi, setmodule_deskripsi] = useState("")
+  const [loading, setLoading] = useState(false)
   // console.log(loading);
 
   // mapelOptions.map((mapel) => console.log(mapel));
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true); // Setloading
+    e.preventDefault()
+    setLoading(true) // Setloading
     const newData = {
       id_kelas,
       id_mapel,
       module,
       module_judul,
       module_deskripsi,
-    };
+    }
 
-    const formData = {};
+    const formData = {}
 
-    if (fields.includes("id_kelas")) formData.id_kelas = id_kelas;
-    if (fields.includes("id_mapel")) formData.id_mapel = id_mapel;
-    if (fields.includes("module")) formData.module = module;
-    if (fields.includes("module_judul")) formData.module_judul = module_judul;
+    if (fields.includes("id_kelas")) formData.id_kelas = id_kelas
+    if (fields.includes("id_mapel")) formData.id_mapel = id_mapel
+    if (fields.includes("module")) formData.module = module
+    if (fields.includes("module_judul")) formData.module_judul = module_judul
     if (fields.includes("module_deskripsi"))
-      formData.module_deskripsi = module_deskripsi;
+      formData.module_deskripsi = module_deskripsi
 
     try {
       const response = await fetch(
         // `${import.meta.env.VITE_API_URL}/genericMapels`,
-        `${import.meta.env.VITE_API_URL}/${endpoint}`,
+        `${window.env.VITE_API_URL}/${endpoint}`,
         {
           method: "POST",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
           body: JSON.stringify(formData),
-        }
-      );
+        },
+      )
       // console.log("ini form data");
       // console.log(formData);
     } catch (error) {
-      console.error("Gagal update:", error);
+      console.error("Gagal update:", error)
       // kamu bisa tampilkan error juga di sini
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
 
-    onSave(newData);
-    setid_kelas(0);
-    setid_mapel(0);
-    setmodule(0);
-    setmodule_judul("");
-    setmodule_deskripsi("");
-    onClose();
-  };
+    onSave(newData)
+    setid_kelas(0)
+    setid_mapel(0)
+    setmodule(0)
+    setmodule_judul("")
+    setmodule_deskripsi("")
+    onClose()
+  }
 
   const handleModalClick = (e) => {
-    e.stopPropagation();
-  };
+    e.stopPropagation()
+  }
 
-  const showField = (fieldName) => fields.includes(fieldName);
+  const showField = (fieldName) => fields.includes(fieldName)
   return (
     <div
       onClick={onClose}
@@ -196,5 +196,5 @@ export default function ListSoalModal({
         </form>
       </div>
     </div>
-  );
+  )
 }

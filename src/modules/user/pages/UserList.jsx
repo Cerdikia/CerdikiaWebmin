@@ -2,7 +2,17 @@
 
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Pencil, Trash2, Search, RefreshCw, UserPlus, Users, ChevronDown, MoreHorizontal, Eye } from "lucide-react"
+import {
+  Pencil,
+  Trash2,
+  Search,
+  RefreshCw,
+  UserPlus,
+  Users,
+  ChevronDown,
+  MoreHorizontal,
+  Eye,
+} from "lucide-react"
 import RefreshToken from "../../../components/_common_/RefreshToken"
 import DeleteUserModal from "../components/DeleteUserModal"
 
@@ -39,7 +49,7 @@ export default function UserList() {
     setError(null)
 
     try {
-      let response = await fetch(`${import.meta.env.VITE_API_URL}/getAllUsers`, {
+      let response = await fetch(`${window.env.VITE_API_URL}/getAllUsers`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -48,7 +58,7 @@ export default function UserList() {
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(`${import.meta.env.VITE_API_URL}/getAllUsers`, {
+          response = await fetch(`${window.env.VITE_API_URL}/getAllUsers`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
@@ -70,7 +80,9 @@ export default function UserList() {
         const stats = {
           guru: allUsers.filter((user) => user.role === "guru").length,
           admin: allUsers.filter((user) => user.role === "admin").length,
-          kepalaSekolah: allUsers.filter((user) => user.role === "kepalaSekolah").length,
+          kepalaSekolah: allUsers.filter(
+            (user) => user.role === "kepalaSekolah",
+          ).length,
           total: allUsers.length,
         }
         setStats(stats)
@@ -105,17 +117,20 @@ export default function UserList() {
     if (!userToDelete) return
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/deleteDataUser`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      const response = await fetch(
+        `${window.env.VITE_API_URL}/deleteDataUser`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+          body: JSON.stringify({
+            email: userToDelete.email,
+            role: userToDelete.role,
+          }),
         },
-        body: JSON.stringify({
-          email: userToDelete.email,
-          role: userToDelete.role,
-        }),
-      })
+      )
 
       if (response.ok) {
         // Remove the deleted user from the list
@@ -124,7 +139,9 @@ export default function UserList() {
         setUserToDelete(null)
       } else {
         const errorData = await response.json()
-        setError(`Failed to delete user: ${errorData.message || "Unknown error"}`)
+        setError(
+          `Failed to delete user: ${errorData.message || "Unknown error"}`,
+        )
       }
     } catch (error) {
       console.error("Error deleting user:", error)
@@ -152,8 +169,12 @@ export default function UserList() {
     <div className="container mx-auto p-4">
       {/* Header with stats */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">User Management</h1>
-        <p className="text-gray-500">Manage all users, roles, and permissions</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          User Management
+        </h1>
+        <p className="text-gray-500">
+          Manage all users, roles, and permissions
+        </p>
       </div>
 
       {/* Stats cards */}
@@ -162,7 +183,9 @@ export default function UserList() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-gray-500">Total Users</p>
-              <p className="text-3xl font-bold mt-2 text-gray-900">{stats.total}</p>
+              <p className="text-3xl font-bold mt-2 text-gray-900">
+                {stats.total}
+              </p>
             </div>
             <div className="p-3 rounded-lg bg-indigo-100">
               <Users className="w-6 h-6 text-indigo-600" />
@@ -177,10 +200,16 @@ export default function UserList() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-gray-500">Guru</p>
-              <p className="text-3xl font-bold mt-2 text-gray-900">{stats.guru}</p>
+              <p className="text-3xl font-bold mt-2 text-gray-900">
+                {stats.guru}
+              </p>
             </div>
-            <div className={`p-3 rounded-lg ${selectedRole === "guru" ? "bg-indigo-500" : "bg-indigo-100"}`}>
-              <Users className={`w-6 h-6 ${selectedRole === "guru" ? "text-white" : "text-indigo-600"}`} />
+            <div
+              className={`p-3 rounded-lg ${selectedRole === "guru" ? "bg-indigo-500" : "bg-indigo-100"}`}
+            >
+              <Users
+                className={`w-6 h-6 ${selectedRole === "guru" ? "text-white" : "text-indigo-600"}`}
+              />
             </div>
           </div>
         </div>
@@ -192,10 +221,16 @@ export default function UserList() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-gray-500">Admin</p>
-              <p className="text-3xl font-bold mt-2 text-gray-900">{stats.admin}</p>
+              <p className="text-3xl font-bold mt-2 text-gray-900">
+                {stats.admin}
+              </p>
             </div>
-            <div className={`p-3 rounded-lg ${selectedRole === "admin" ? "bg-indigo-500" : "bg-indigo-100"}`}>
-              <Users className={`w-6 h-6 ${selectedRole === "admin" ? "text-white" : "text-indigo-600"}`} />
+            <div
+              className={`p-3 rounded-lg ${selectedRole === "admin" ? "bg-indigo-500" : "bg-indigo-100"}`}
+            >
+              <Users
+                className={`w-6 h-6 ${selectedRole === "admin" ? "text-white" : "text-indigo-600"}`}
+              />
             </div>
           </div>
         </div>
@@ -206,11 +241,19 @@ export default function UserList() {
         >
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-gray-500">Kepala Sekolah</p>
-              <p className="text-3xl font-bold mt-2 text-gray-900">{stats.kepalaSekolah}</p>
+              <p className="text-sm font-medium text-gray-500">
+                Kepala Sekolah
+              </p>
+              <p className="text-3xl font-bold mt-2 text-gray-900">
+                {stats.kepalaSekolah}
+              </p>
             </div>
-            <div className={`p-3 rounded-lg ${selectedRole === "kepalaSekolah" ? "bg-indigo-500" : "bg-indigo-100"}`}>
-              <Users className={`w-6 h-6 ${selectedRole === "kepalaSekolah" ? "text-white" : "text-indigo-600"}`} />
+            <div
+              className={`p-3 rounded-lg ${selectedRole === "kepalaSekolah" ? "bg-indigo-500" : "bg-indigo-100"}`}
+            >
+              <Users
+                className={`w-6 h-6 ${selectedRole === "kepalaSekolah" ? "text-white" : "text-indigo-600"}`}
+              />
             </div>
           </div>
         </div>
@@ -222,7 +265,10 @@ export default function UserList() {
         <div className="p-6 border-b border-gray-100">
           <div className="flex flex-col md:flex-row gap-4 justify-between">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Search users by name or email..."
@@ -320,17 +366,23 @@ export default function UserList() {
                           <div className="h-10 w-10 flex-shrink-0">
                             <img
                               className="h-10 w-10 rounded-full object-cover border border-gray-200"
-                              src={user.image_profile || "/img/default_user.png"}
+                              src={
+                                user.image_profile || "/img/default_user.png"
+                              }
                               alt={user.nama}
                             />
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{user.nama || "No Name"}</div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {user.nama || "No Name"}
+                            </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{user.email}</div>
+                        <div className="text-sm text-gray-900">
+                          {user.email}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800 capitalize">
@@ -338,7 +390,9 @@ export default function UserList() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{new Date(user.date_created).toLocaleDateString()}</div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(user.date_created).toLocaleDateString()}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
@@ -381,11 +435,16 @@ export default function UserList() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-sm text-gray-500">
+                    <td
+                      colSpan="5"
+                      className="px-6 py-12 text-center text-sm text-gray-500"
+                    >
                       <div className="flex flex-col items-center">
                         <Users className="w-12 h-12 text-gray-300 mb-2" />
                         <p className="text-gray-500 mb-1">No users found</p>
-                        <p className="text-gray-400 text-xs">Try changing your search or filter criteria</p>
+                        <p className="text-gray-400 text-xs">
+                          Try changing your search or filter criteria
+                        </p>
                       </div>
                     </td>
                   </tr>
@@ -398,7 +457,8 @@ export default function UserList() {
         {/* Footer with pagination */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            Showing <span className="font-medium">{filteredUsers.length}</span> users
+            Showing <span className="font-medium">{filteredUsers.length}</span>{" "}
+            users
           </div>
 
           <div className="flex gap-2">

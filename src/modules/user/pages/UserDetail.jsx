@@ -32,20 +32,26 @@ export default function UserDetail() {
 
     try {
       // First, try to get the user with the current role
-      let response = await fetch(`${import.meta.env.VITE_API_URL}/getDataActor/${role}/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      let response = await fetch(
+        `${window.env.VITE_API_URL}/getDataActor/${role}/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         },
-      })
+      )
 
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(`${import.meta.env.VITE_API_URL}/getDataActor/${role}/${id}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          response = await fetch(
+            `${window.env.VITE_API_URL}/getDataActor/${role}/${id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+              },
             },
-          })
+          )
         } else {
           navigate("/login", { replace: true })
           return
@@ -56,22 +62,35 @@ export default function UserDetail() {
       console.log("API Response:", data) // Debug log
 
       // Check if data exists and handle both array and object responses
-      if (data.Message === "Success" || data.Message === "Data retrieved successfully") {
+      if (
+        data.Message === "Success" ||
+        data.Message === "Data retrieved successfully"
+      ) {
         // Handle case where Data is an array
         if (Array.isArray(data.Data) && data.Data.length > 0) {
           const userData = data.Data[0]
           // If image_profile is missing or null, use the one from state
-          if ((!userData.image_profile || userData.image_profile === "") && userDataFromState?.image_profile) {
+          if (
+            (!userData.image_profile || userData.image_profile === "") &&
+            userDataFromState?.image_profile
+          ) {
             userData.image_profile = userDataFromState.image_profile
           }
           setUser(userData)
           return
         }
         // Handle case where Data is an object
-        else if (data.Data && typeof data.Data === "object" && data.Data.email) {
+        else if (
+          data.Data &&
+          typeof data.Data === "object" &&
+          data.Data.email
+        ) {
           const userData = data.Data
           // If image_profile is missing or null, use the one from state
-          if ((!userData.image_profile || userData.image_profile === "") && userDataFromState?.image_profile) {
+          if (
+            (!userData.image_profile || userData.image_profile === "") &&
+            userDataFromState?.image_profile
+          ) {
             userData.image_profile = userDataFromState.image_profile
           }
           setUser(userData)
@@ -82,28 +101,40 @@ export default function UserDetail() {
       // If we get here, we didn't find a user with the current role
       // Try other roles if we started with the role from state
       if (role === initialRole) {
-        const roles = ["guru", "admin", "kepalaSekolah"].filter((r) => r !== role)
+        const roles = ["guru", "admin", "kepalaSekolah"].filter(
+          (r) => r !== role,
+        )
         let userFound = false
 
         for (const newRole of roles) {
           try {
             console.log(`Trying role: ${newRole}`) // Debug log
-            const altResponse = await fetch(`${import.meta.env.VITE_API_URL}/getDataActor/${newRole}/${id}`, {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            const altResponse = await fetch(
+              `${window.env.VITE_API_URL}/getDataActor/${newRole}/${id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+                },
               },
-            })
+            )
 
             if (altResponse.ok) {
               const altData = await altResponse.json()
               console.log(`Response for role ${newRole}:`, altData) // Debug log
 
-              if (altData.Message === "Success" || altData.Message === "Data retrieved successfully") {
+              if (
+                altData.Message === "Success" ||
+                altData.Message === "Data retrieved successfully"
+              ) {
                 // Handle array response
                 if (Array.isArray(altData.Data) && altData.Data.length > 0) {
                   const userData = altData.Data[0]
                   // If image_profile is missing or null, use the one from state
-                  if ((!userData.image_profile || userData.image_profile === "") && userDataFromState?.image_profile) {
+                  if (
+                    (!userData.image_profile ||
+                      userData.image_profile === "") &&
+                    userDataFromState?.image_profile
+                  ) {
                     userData.image_profile = userDataFromState.image_profile
                   }
                   setUser(userData)
@@ -112,10 +143,18 @@ export default function UserDetail() {
                   break
                 }
                 // Handle object response
-                else if (altData.Data && typeof altData.Data === "object" && altData.Data.email) {
+                else if (
+                  altData.Data &&
+                  typeof altData.Data === "object" &&
+                  altData.Data.email
+                ) {
                   const userData = altData.Data
                   // If image_profile is missing or null, use the one from state
-                  if ((!userData.image_profile || userData.image_profile === "") && userDataFromState?.image_profile) {
+                  if (
+                    (!userData.image_profile ||
+                      userData.image_profile === "") &&
+                    userDataFromState?.image_profile
+                  ) {
                     userData.image_profile = userDataFromState.image_profile
                   }
                   setUser(userData)
@@ -131,7 +170,9 @@ export default function UserDetail() {
         }
 
         if (!userFound) {
-          setError("User not found. Please check the email address and try again.")
+          setError(
+            "User not found. Please check the email address and try again.",
+          )
         }
       } else {
         setError("User not found with the specified role.")
@@ -150,23 +191,28 @@ export default function UserDetail() {
 
   const handleDeleteConfirm = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/deleteDataUser`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      const response = await fetch(
+        `${window.env.VITE_API_URL}/deleteDataUser`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+          body: JSON.stringify({
+            email: user.email,
+            role: role,
+          }),
         },
-        body: JSON.stringify({
-          email: user.email,
-          role: role,
-        }),
-      })
+      )
 
       if (response.ok) {
         navigate("/users", { replace: true })
       } else {
         const errorData = await response.json()
-        setError(`Failed to delete user: ${errorData.message || "Unknown error"}`)
+        setError(
+          `Failed to delete user: ${errorData.message || "Unknown error"}`,
+        )
       }
     } catch (error) {
       console.error("Error deleting user:", error)
@@ -221,7 +267,10 @@ export default function UserDetail() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex items-center mb-6">
-        <button onClick={() => navigate("/users")} className="mr-4 p-2 rounded-full hover:bg-gray-100">
+        <button
+          onClick={() => navigate("/users")}
+          className="mr-4 p-2 rounded-full hover:bg-gray-100"
+        >
           <ArrowLeft size={20} />
         </button>
         <h1 className="text-2xl font-bold">User Details</h1>
@@ -235,12 +284,18 @@ export default function UserDetail() {
               alt={user.nama}
               className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md"
             />
-            <h2 className="mt-4 text-xl font-bold text-gray-900">{user.nama}</h2>
+            <h2 className="mt-4 text-xl font-bold text-gray-900">
+              {user.nama}
+            </h2>
             <p className="text-indigo-600 font-medium capitalize">{role}</p>
 
             <div className="mt-6 flex space-x-2">
               <button
-                onClick={() => navigate(`/users/edit/${user.email}`, { state: { user, role } })}
+                onClick={() =>
+                  navigate(`/users/edit/${user.email}`, {
+                    state: { user, role },
+                  })
+                }
                 className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
               >
                 <Edit size={16} />
@@ -275,31 +330,45 @@ export default function UserDetail() {
 
               {user.jabatan && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Position</h3>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Position
+                  </h3>
                   <p className="mt-1 text-lg">{user.jabatan}</p>
                 </div>
               )}
 
               {user.date_created && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Created At</h3>
-                  <p className="mt-1 text-lg">{new Date(user.date_created).toLocaleDateString()}</p>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Created At
+                  </h3>
+                  <p className="mt-1 text-lg">
+                    {new Date(user.date_created).toLocaleDateString()}
+                  </p>
                 </div>
               )}
 
               {user.updated_at && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Last Updated</h3>
-                  <p className="mt-1 text-lg">{new Date(user.updated_at).toLocaleDateString()}</p>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Last Updated
+                  </h3>
+                  <p className="mt-1 text-lg">
+                    {new Date(user.updated_at).toLocaleDateString()}
+                  </p>
                 </div>
               )}
             </div>
 
             {/* Activity section */}
             <div className="mt-8">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Recent Activity
+              </h3>
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <p className="text-gray-500 text-center py-4">No recent activity found</p>
+                <p className="text-gray-500 text-center py-4">
+                  No recent activity found
+                </p>
                 {/* Activity items would go here */}
               </div>
             </div>

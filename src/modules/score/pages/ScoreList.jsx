@@ -2,7 +2,17 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, RefreshCw, Filter, ArrowUpDown, Download, Users, Award, TrendingUp, BookOpen } from "lucide-react"
+import {
+  Search,
+  RefreshCw,
+  Filter,
+  ArrowUpDown,
+  Download,
+  Users,
+  Award,
+  TrendingUp,
+  BookOpen,
+} from "lucide-react"
 import RefreshToken from "../../../components/_common_/RefreshToken"
 
 export default function ScoreList() {
@@ -15,12 +25,15 @@ export default function ScoreList() {
   const [selectedSubject, setSelectedSubject] = useState("")
   const [classes, setClasses] = useState([])
   const [subjects, setSubjects] = useState([])
-  const [sortConfig, setSortConfig] = useState({ key: "created_at", direction: "desc" })
+  const [sortConfig, setSortConfig] = useState({
+    key: "created_at",
+    direction: "desc",
+  })
 
   // Fetch classes for the filter dropdown
   const fetchClasses = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/kelas`, {
+      const response = await fetch(`${window.env.VITE_API_URL}/kelas`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -40,11 +53,14 @@ export default function ScoreList() {
   // Fetch subjects for the filter dropdown
   const fetchSubjects = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/genericAllMapels`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      const response = await fetch(
+        `${window.env.VITE_API_URL}/genericAllMapels`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         },
-      })
+      )
 
       if (response.ok) {
         const data = await response.json()
@@ -63,7 +79,7 @@ export default function ScoreList() {
     setError(null)
 
     try {
-      let response = await fetch(`${import.meta.env.VITE_API_URL}/gegeralLogs`, {
+      let response = await fetch(`${window.env.VITE_API_URL}/gegeralLogs`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -72,7 +88,7 @@ export default function ScoreList() {
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(`${import.meta.env.VITE_API_URL}/gegeralLogs`, {
+          response = await fetch(`${window.env.VITE_API_URL}/gegeralLogs`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
@@ -146,9 +162,13 @@ export default function ScoreList() {
   const filteredAndSortedScores = useMemo(() => {
     // First apply filters
     const result = processedScores.filter((score) => {
-      const matchesSearch = score.email.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesClass = selectedClass === "" || score.id_kelas.toString() === selectedClass
-      const matchesSubject = selectedSubject === "" || score.id_mapel.toString() === selectedSubject
+      const matchesSearch = score.email
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+      const matchesClass =
+        selectedClass === "" || score.id_kelas.toString() === selectedClass
+      const matchesSubject =
+        selectedSubject === "" || score.id_mapel.toString() === selectedSubject
       return matchesSearch && matchesClass && matchesSubject
     })
 
@@ -195,18 +215,29 @@ export default function ScoreList() {
     }
 
     // Get unique students
-    const uniqueStudents = new Set(filteredAndSortedScores.map((score) => score.email)).size
+    const uniqueStudents = new Set(
+      filteredAndSortedScores.map((score) => score.email),
+    ).size
 
     // Calculate average score
-    const totalScore = filteredAndSortedScores.reduce((sum, score) => sum + score.skor, 0)
+    const totalScore = filteredAndSortedScores.reduce(
+      (sum, score) => sum + score.skor,
+      0,
+    )
     const averageScore = totalScore / filteredAndSortedScores.length
 
     // Find highest and lowest scores
-    const highestScore = Math.max(...filteredAndSortedScores.map((score) => score.skor))
-    const lowestScore = Math.min(...filteredAndSortedScores.map((score) => score.skor))
+    const highestScore = Math.max(
+      ...filteredAndSortedScores.map((score) => score.skor),
+    )
+    const lowestScore = Math.min(
+      ...filteredAndSortedScores.map((score) => score.skor),
+    )
 
     // Calculate passing rate (scores >= 60)
-    const passingScores = filteredAndSortedScores.filter((score) => score.skor >= 60).length
+    const passingScores = filteredAndSortedScores.filter(
+      (score) => score.skor >= 60,
+    ).length
     const passingRate = (passingScores / filteredAndSortedScores.length) * 100
 
     // Class breakdown
@@ -277,7 +308,15 @@ export default function ScoreList() {
     if (filteredAndSortedScores.length === 0) return
 
     // Prepare data with proper headers and formatted values
-    const headers = ["ID", "Email", "Class", "Subject", "Module ID", "Score", "Date"]
+    const headers = [
+      "ID",
+      "Email",
+      "Class",
+      "Subject",
+      "Module ID",
+      "Score",
+      "Date",
+    ]
 
     const csvData = filteredAndSortedScores.map((score) => [
       score.id_logs,
@@ -301,14 +340,20 @@ export default function ScoreList() {
         .join(",")
     }
 
-    const csvContent = [processRow(headers), ...csvData.map((row) => processRow(row))].join("\n")
+    const csvContent = [
+      processRow(headers),
+      ...csvData.map((row) => processRow(row)),
+    ].join("\n")
 
     // Create and download the file
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.setAttribute("href", url)
-    link.setAttribute("download", `student_scores_${new Date().toISOString().slice(0, 10)}.csv`)
+    link.setAttribute(
+      "download",
+      `student_scores_${new Date().toISOString().slice(0, 10)}.csv`,
+    )
     link.style.visibility = "hidden"
     document.body.appendChild(link)
     link.click()
@@ -347,8 +392,12 @@ export default function ScoreList() {
                     <Users className="h-5 w-5 text-indigo-600" />
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-500">Total Students</p>
-                    <p className="text-xl font-bold">{statistics.totalStudents}</p>
+                    <p className="text-sm font-medium text-gray-500">
+                      Total Students
+                    </p>
+                    <p className="text-xl font-bold">
+                      {statistics.totalStudents}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -359,8 +408,12 @@ export default function ScoreList() {
                     <Award className="h-5 w-5 text-green-600" />
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-500">Average Score</p>
-                    <p className="text-xl font-bold">{statistics.averageScore.toFixed(1)}</p>
+                    <p className="text-sm font-medium text-gray-500">
+                      Average Score
+                    </p>
+                    <p className="text-xl font-bold">
+                      {statistics.averageScore.toFixed(1)}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -371,8 +424,12 @@ export default function ScoreList() {
                     <TrendingUp className="h-5 w-5 text-amber-600" />
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-500">Highest Score</p>
-                    <p className="text-xl font-bold">{statistics.highestScore}</p>
+                    <p className="text-sm font-medium text-gray-500">
+                      Highest Score
+                    </p>
+                    <p className="text-xl font-bold">
+                      {statistics.highestScore}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -383,8 +440,12 @@ export default function ScoreList() {
                     <BookOpen className="h-5 w-5 text-blue-600" />
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-500">Passing Rate</p>
-                    <p className="text-xl font-bold">{statistics.passingRate.toFixed(1)}%</p>
+                    <p className="text-sm font-medium text-gray-500">
+                      Passing Rate
+                    </p>
+                    <p className="text-xl font-bold">
+                      {statistics.passingRate.toFixed(1)}%
+                    </p>
                   </div>
                 </div>
               </div>
@@ -394,21 +455,29 @@ export default function ScoreList() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Class Breakdown */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Class Performance</h3>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">
+                  Class Performance
+                </h3>
                 <div className="space-y-2">
                   {statistics.classBreakdown.map((cls) => (
                     <div key={cls.id} className="bg-gray-50 p-3 rounded-md">
                       <div className="flex justify-between items-center mb-1">
                         <span className="font-medium">{cls.name}</span>
-                        <span className="text-sm text-gray-500">{cls.count} scores</span>
+                        <span className="text-sm text-gray-500">
+                          {cls.count} scores
+                        </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
                         <div
                           className="bg-indigo-600 h-2.5 rounded-full"
-                          style={{ width: `${Math.min(100, (cls.averageScore / 100) * 100)}%` }}
+                          style={{
+                            width: `${Math.min(100, (cls.averageScore / 100) * 100)}%`,
+                          }}
                         ></div>
                       </div>
-                      <div className="text-right text-xs mt-1">Avg: {cls.averageScore.toFixed(1)}</div>
+                      <div className="text-right text-xs mt-1">
+                        Avg: {cls.averageScore.toFixed(1)}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -416,21 +485,29 @@ export default function ScoreList() {
 
               {/* Subject Breakdown */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Subject Performance</h3>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">
+                  Subject Performance
+                </h3>
                 <div className="space-y-2">
                   {statistics.subjectBreakdown.map((subject) => (
                     <div key={subject.id} className="bg-gray-50 p-3 rounded-md">
                       <div className="flex justify-between items-center mb-1">
                         <span className="font-medium">{subject.name}</span>
-                        <span className="text-sm text-gray-500">{subject.count} scores</span>
+                        <span className="text-sm text-gray-500">
+                          {subject.count} scores
+                        </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
                         <div
                           className="bg-green-600 h-2.5 rounded-full"
-                          style={{ width: `${Math.min(100, (subject.averageScore / 100) * 100)}%` }}
+                          style={{
+                            width: `${Math.min(100, (subject.averageScore / 100) * 100)}%`,
+                          }}
                         ></div>
                       </div>
-                      <div className="text-right text-xs mt-1">Avg: {subject.averageScore.toFixed(1)}</div>
+                      <div className="text-right text-xs mt-1">
+                        Avg: {subject.averageScore.toFixed(1)}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -445,7 +522,10 @@ export default function ScoreList() {
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Search by email..."
@@ -457,7 +537,10 @@ export default function ScoreList() {
           </div>
           <div className="flex flex-wrap gap-2">
             <div className="relative">
-              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Filter
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
@@ -472,7 +555,10 @@ export default function ScoreList() {
               </select>
             </div>
             <div className="relative">
-              <BookOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <BookOpen
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <select
                 value={selectedSubject}
                 onChange={(e) => setSelectedSubject(e.target.value)}
@@ -480,7 +566,10 @@ export default function ScoreList() {
               >
                 <option value="">All Subjects</option>
                 {subjects.map((subject) => (
-                  <option key={subject.id_mapel} value={subject.id_mapel.toString()}>
+                  <option
+                    key={subject.id_mapel}
+                    value={subject.id_mapel.toString()}
+                  >
                     {subject.mapel}
                   </option>
                 ))}
@@ -510,37 +599,55 @@ export default function ScoreList() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <button className="flex items-center" onClick={() => requestSort("email")}>
+                    <button
+                      className="flex items-center"
+                      onClick={() => requestSort("email")}
+                    >
                       Student Email
                       <ArrowUpDown size={14} className="ml-1" />
                     </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <button className="flex items-center" onClick={() => requestSort("id_kelas")}>
+                    <button
+                      className="flex items-center"
+                      onClick={() => requestSort("id_kelas")}
+                    >
                       Class
                       <ArrowUpDown size={14} className="ml-1" />
                     </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <button className="flex items-center" onClick={() => requestSort("id_mapel")}>
+                    <button
+                      className="flex items-center"
+                      onClick={() => requestSort("id_mapel")}
+                    >
                       Subject
                       <ArrowUpDown size={14} className="ml-1" />
                     </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <button className="flex items-center" onClick={() => requestSort("id_module")}>
+                    <button
+                      className="flex items-center"
+                      onClick={() => requestSort("id_module")}
+                    >
                       Module ID
                       <ArrowUpDown size={14} className="ml-1" />
                     </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <button className="flex items-center" onClick={() => requestSort("skor")}>
+                    <button
+                      className="flex items-center"
+                      onClick={() => requestSort("skor")}
+                    >
                       Score
                       <ArrowUpDown size={14} className="ml-1" />
                     </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <button className="flex items-center" onClick={() => requestSort("created_at")}>
+                    <button
+                      className="flex items-center"
+                      onClick={() => requestSort("created_at")}
+                    >
                       Date
                       <ArrowUpDown size={14} className="ml-1" />
                     </button>
@@ -552,16 +659,24 @@ export default function ScoreList() {
                   filteredAndSortedScores.map((score) => (
                     <tr key={score.id_logs} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{score.email}</div>
+                        <div className="text-sm text-gray-900">
+                          {score.email}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{getClassName(score.id_kelas)}</div>
+                        <div className="text-sm text-gray-900">
+                          {getClassName(score.id_kelas)}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{getSubjectName(score.id_mapel)}</div>
+                        <div className="text-sm text-gray-900">
+                          {getSubjectName(score.id_mapel)}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{score.id_module}</div>
+                        <div className="text-sm text-gray-900">
+                          {score.id_module}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
@@ -577,13 +692,18 @@ export default function ScoreList() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{formatDate(score.created_at)}</div>
+                        <div className="text-sm text-gray-500">
+                          {formatDate(score.created_at)}
+                        </div>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">
+                    <td
+                      colSpan="6"
+                      className="px-6 py-4 text-center text-sm text-gray-500"
+                    >
                       No scores found
                     </td>
                   </tr>
