@@ -403,13 +403,13 @@ export default function AdminPage() {
                 <span className="hidden sm:inline">Refresh</span>
               </button>
 
-              <button
+              {/* <button
                 onClick={handleImportModule}
                 className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
               >
                 <Upload size={18} />
                 <span className="hidden sm:inline">Import Module</span>
-              </button>
+              </button> */}
 
               <button
                 onClick={() => {

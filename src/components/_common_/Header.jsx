@@ -49,7 +49,7 @@ export default function Header({ toggleSidebar, isDarkMode, toggleDarkMode }) {
           <Link to="/" className="flex items-center">
             <img src="/vite.svg" alt="Logo" className="h-8 w-8 mr-2" />
             <span className="text-l font-bold text-indigo-600 dark:text-indigo-400 hidden md:inline-block">
-              LMS SD Negeri 8 Metro Pusat
+              SD Negeri 8 Metro Pusat
             </span>
           </Link>
         </div>
@@ -65,7 +65,9 @@ export default function Header({ toggleSidebar, isDarkMode, toggleDarkMode }) {
         </button>
 
         <div className="hidden lg:flex items-center ml-6">
-          <span className="text-gray-700 dark:text-gray-300 font-medium">DASHBOARD</span>
+          <span className="text-gray-700 dark:text-gray-300 font-medium">
+            DASHBOARD
+          </span>
         </div>
       </div>
 
@@ -75,14 +77,19 @@ export default function Header({ toggleSidebar, isDarkMode, toggleDarkMode }) {
         <button
           onClick={toggleDarkMode}
           className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-          aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          aria-label={
+            isDarkMode ? "Switch to light mode" : "Switch to dark mode"
+          }
         >
           {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
 
         {/* User profile */}
         <div className="relative" ref={dropdownRef}>
-          <button onClick={() => setShowDropdown(!showDropdown)} className="flex items-center focus:outline-none">
+          <button
+            onClick={() => setShowDropdown(!showDropdown)}
+            className="flex items-center focus:outline-none"
+          >
             <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-white font-semibold">
               {userData?.image_profile ? (
                 <img
@@ -99,9 +106,15 @@ export default function Header({ toggleSidebar, isDarkMode, toggleDarkMode }) {
           {showDropdown && (
             <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700">
               <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{userData?.nama || "User"}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{userData?.email || ""}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">{userData?.role || "User"}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  {userData?.nama || "User"}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {userData?.email || ""}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">
+                  {userData?.role || "User"}
+                </p>
               </div>
               <Link
                 to={`/users/edit/${encodeURIComponent(userData?.email || "")}`}
