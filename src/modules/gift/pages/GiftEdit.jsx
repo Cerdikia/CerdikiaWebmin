@@ -59,14 +59,11 @@ export default function GiftEdit() {
         if (response.status === 401) {
           const refreshed = await RefreshToken()
           if (refreshed) {
-            response = await fetch(
-              `${import.meta.env.VITE_API_URL}/gifts/${id}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-                },
+            response = await fetch(`${window.env.VITE_API_URL}/gifts/${id}`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
               },
-            )
+            })
           } else {
             navigate("/login", { replace: true })
             return
@@ -176,30 +173,26 @@ export default function GiftEdit() {
       }
 
       // Make the API request
-      let response = await fetch(
-        `${import.meta.env.VITE_API_URL}/gifts/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-          body: apiFormData,
+      console.log("API hit", `${window.env.VITE_API_URL}/gifts/${id}`)
+
+      let response = await fetch(`${window.env.VITE_API_URL}/gifts/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
-      )
+        body: apiFormData,
+      })
 
       if (response.status === 401) {
         const refreshed = await RefreshToken()
         if (refreshed) {
-          response = await fetch(
-            `${import.meta.env.VITE_API_URL}/gifts/${id}`,
-            {
-              method: "PUT",
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-              },
-              body: apiFormData,
+          response = await fetch(`${window.env.VITE_API_URL}/gifts/${id}`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
-          )
+            body: apiFormData,
+          })
         } else {
           navigate("/login", { replace: true })
           return

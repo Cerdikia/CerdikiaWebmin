@@ -85,6 +85,7 @@ export default function StudentVerification() {
           nama: student.nama,
           id_kelas: student.id_kelas,
           kelas: student.kelas,
+          image_profile: student.image_profile,
           // verification_status: student.verification_status || "waiting",
           verified_status: student.verified_status || "waiting",
         }))
@@ -584,7 +585,8 @@ export default function StudentVerification() {
                             <img
                               className="h-10 w-10 rounded-full object-cover border border-gray-200"
                               src={
-                                student.image_profile || "/img/default_user.png"
+                                student.image_profile ||
+                                "https://cerdikia-backend.raffimrg.my.id/uploads/default_user.png"
                               }
                               alt={student.nama}
                             />
