@@ -20,7 +20,6 @@ import {
   Info,
 } from "lucide-react"
 import FetchData from "../../../components/_common_/FetchData"
-import DashboardLayout from "../../../components/_common_/DashboardLayout"
 import * as XLSX from "xlsx"
 
 export default function SemesterRecap() {
@@ -42,7 +41,7 @@ export default function SemesterRecap() {
   const [selectedData, setSelectedData] = useState(null)
   const [createForm, setCreateForm] = useState({
     tahun_ajaran: "",
-    // semester: "Ganjil",
+    semester: "Ganjil",
     delete_logs_data: false,
     filter_kelas: "",
     filter_mapel: "",
@@ -112,6 +111,7 @@ export default function SemesterRecap() {
       })
 
       if (response && response.data) {
+        // console.log("rekap-semester-all", response.data[0].tahun_ajaran)
         setRecapData(response.data)
         setFilteredData(response.data)
       }
@@ -124,6 +124,8 @@ export default function SemesterRecap() {
   }
 
   const fetchClasses = async () => {
+    console.log("runing fetch class")
+
     try {
       const token = localStorage.getItem("access_token")
       const response = await FetchData({
@@ -133,6 +135,7 @@ export default function SemesterRecap() {
       })
 
       if (response) {
+        // console.log(response)
         setClasses(response)
       }
     } catch (error) {
@@ -193,6 +196,9 @@ export default function SemesterRecap() {
       const requestBody = {
         tahun_ajaran: createForm.tahun_ajaran,
         delete_logs_data: createForm.delete_logs_data,
+        semester: createForm.semester,
+        // created_at: new Date().toISOString().slice(0, 19).replace("T", " "),
+        created_at: new Date().toISOString(),
       }
 
       // Add optional parameters if they exist
@@ -210,6 +216,9 @@ export default function SemesterRecap() {
         requestBody.id_kelas = createForm.filter_kelas
       if (createForm.filter_mapel)
         requestBody.id_mapel = createForm.filter_mapel
+
+      console.log("request body : ", requestBody)
+
       const response = await FetchData({
         // url: `${window.env.VITE_API_URL}/rekap-semester`,
         url: `${window.env.VITE_API_URL}${endpoint}`,
@@ -220,12 +229,6 @@ export default function SemesterRecap() {
       })
 
       if (response) {
-        // showNotification(
-        //   `Rekap semester berhasil dibuat. ${response.success_count} data berhasil direkap, ${
-        //     response.skipped_count
-        //   } data dilewati. ${response.logs_deleted ? "Data logs telah dihapus." : ""}`,
-        //   "success",
-        // )
         const successMessage =
           endpoint === "/rekap-semester-all-siswa"
             ? `Rekap semester untuk semua siswa berhasil dibuat. Total ${response.total_logs_processed || 0} data diproses.`
@@ -470,8 +473,8 @@ export default function SemesterRecap() {
   }
 
   return (
-    // <DashboardLayout>
     <div className="">
+      {/* {console.log(classes)} */}
       <div className="container px-4 py-6 mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Rekap Semester</h1>
@@ -574,8 +577,10 @@ export default function SemesterRecap() {
         </div>
 
         {/* Filters */}
+        {console.log("kondisi 1", classes)}
         {showFilters && (
           <div className="p-4 mb-6 bg-gray-50 border border-gray-200 rounded-lg">
+            {console.log("kondisi 2", classes)}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div>
                 <label
@@ -600,26 +605,6 @@ export default function SemesterRecap() {
                   ))}
                 </select>
               </div>
-              {/* <div>
-                <label
-                  htmlFor="semester"
-                  className="block mb-1 text-sm font-medium text-gray-700"
-                >
-                  Semester
-                </label>
-                <select
-                  id="semester"
-                  value={filters.semester}
-                  onChange={(e) =>
-                    setFilters({ ...filters, semester: e.target.value })
-                  }
-                  className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                  <option value="">Semua Semester</option>
-                  <option value="Ganjil">Ganjil</option>
-                  <option value="Genap">Genap</option>
-                </select>
-              </div> */}
               <div>
                 <label
                   htmlFor="id_kelas"
@@ -627,6 +612,7 @@ export default function SemesterRecap() {
                 >
                   Kelas
                 </label>
+                {console.log(classes)}
                 <select
                   id="id_kelas"
                   value={filters.id_kelas}
@@ -636,9 +622,11 @@ export default function SemesterRecap() {
                   className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 >
                   <option value="">Semua Kelas</option>
+                  {/* {console.log(classes)} */}
                   {classes.map((kelas) => (
                     <option key={kelas.id_kelas} value={kelas.id_kelas}>
                       {kelas.kelas}
+                      {/* {console.log("kelas", kelas.kelas)} */}
                     </option>
                   ))}
                 </select>
@@ -751,7 +739,16 @@ export default function SemesterRecap() {
                           {item.tahun_ajaran}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                          {item.semester}
+                          {/* <span className="bg-red-400">{item.semester}</span> */}
+                          <span
+                            className={`px-2 py-1 rounded text-white text-xs font-medium ${
+                              item.semester === "ganjil"
+                                ? "bg-green-500"
+                                : "bg-blue-500"
+                            }`}
+                          >
+                            {item.semester}
+                          </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                           {formatDate(item.created_at)}
@@ -918,7 +915,8 @@ export default function SemesterRecap() {
                 </div>
               </div>
 
-              <div>
+              {/* FILTER KELAS */}
+              {/* <div>
                 <label
                   htmlFor="filter_kelas"
                   className="block mb-1 text-sm font-medium text-gray-700"
@@ -939,13 +937,14 @@ export default function SemesterRecap() {
                   <option value="">Semua Kelas</option>
                   {classes.map((kelas) => (
                     <option key={kelas.id_kelas} value={kelas.id_kelas}>
-                      {kelas.nama_kelas}
+                      {kelas.kelas}
                     </option>
                   ))}
                 </select>
-              </div>
+              </div> */}
 
-              <div>
+              {/* FILTER MATA PELAJARAN */}
+              {/* <div>
                 <label
                   htmlFor="filter_mapel"
                   className="block mb-1 text-sm font-medium text-gray-700"
@@ -970,7 +969,7 @@ export default function SemesterRecap() {
                     </option>
                   ))}
                 </select>
-              </div>
+              </div> */}
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
@@ -1277,7 +1276,6 @@ export default function SemesterRecap() {
           </div>
         </div>
       )}
-      {/* </DashboardLayout> */}
     </div>
   )
 }

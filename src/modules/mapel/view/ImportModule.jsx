@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   ArrowLeft,
   Upload,
+  Download,
   FileSpreadsheet,
   AlertCircle,
   Loader2,
@@ -19,6 +20,8 @@ import {
 } from "lucide-react"
 import ReactQuill from "react-quill"
 import "react-quill/dist/quill.snow.css"
+import * as XLSX from "xlsx"
+// import * as XLSX from "xlsx-style"
 
 export default function ImportModule() {
   const navigate = useNavigate()
@@ -36,6 +39,21 @@ export default function ImportModule() {
   const [editingOption, setEditingOption] = useState(null)
   const [editedContent, setEditedContent] = useState("")
   const [deleteConfirmation, setDeleteConfirmation] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [guruOrAdmin, setGuruOrAdmin] = useState(false)
+  const [invalidData, setInvalidData] = useState([])
+  const [rawImportedData, setRawImportedData] = useState(null)
+  const [guruMapel, setGuruMapel] = useState(() => {
+    const stored = localStorage.getItem("guru_mapel")
+    try {
+      return stored ? JSON.parse(stored) : []
+    } catch (err) {
+      return []
+    }
+  })
+
+  const userData = JSON.parse(localStorage.getItem("user_data"))
+  // const guruMapel = JSON.parse(localStorage.getItem("guru_mapel") || [])
 
   // Quill modules and formats configuration
   const quillModules = {
@@ -99,6 +117,126 @@ export default function ImportModule() {
     setFile(file)
   }
 
+  // Handle Template
+  // const handleTemplate = () => {
+  //   // Data dummy (bisa kamu ganti dengan data dari backend atau form)
+  //   const data = [
+  //     {
+  //       mapel: "Matematika",
+  //       kelas: "10",
+  //       judul_module: "Aljabar Dasar",
+  //       deskripsi_module: "Materi aljabar kelas 10",
+  //       soal: "Berapakah hasil dari 2x + 3 = 7?",
+  //       jenis: "Pilihan Ganda",
+  //       opsi_a: "1",
+  //       opsi_b: "2",
+  //       opsi_c: "3",
+  //       opsi_d: "4",
+  //       jawaban: "b",
+  //     },
+  //     {
+  //       mapel: "",
+  //       kelas: "",
+  //       judul_module: "",
+  //       deskripsi_module: "",
+  //       soal: "",
+  //       jenis: "",
+  //       opsi_a: "",
+  //       opsi_b: "",
+  //       opsi_c: "",
+  //       opsi_d: "",
+  //       jawaban: "",
+  //     },
+  //   ]
+
+  //   const worksheet = XLSX.utils.json_to_sheet(data)
+  //   const workbook = XLSX.utils.book_new()
+
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Soal")
+
+  //   XLSX.writeFile(workbook, "template_soal.xlsx")
+  // }
+  const handleTemplate = () => {
+    const header = [
+      [
+        "mapel",
+        "kelas",
+        "judul_module",
+        "deskripsi_module",
+        "soal",
+        "jenis",
+        "opsi_a",
+        "opsi_b",
+        "opsi_c",
+        "opsi_d",
+        "jawaban",
+      ],
+    ]
+
+    const data = [
+      [
+        "Matematika",
+        "1",
+        "penjumlahan",
+        "Materi kelas 1",
+        "1+1",
+        "Pilihan Ganda",
+        "1",
+        "2",
+        "3",
+        "4",
+        "b",
+      ],
+    ]
+
+    const worksheet = XLSX.utils.aoa_to_sheet([...header, ...data])
+
+    // Buat border dan background header secara manual
+    const headerCellStyle = {
+      fill: {
+        patternType: "solid",
+        fgColor: { rgb: "D9D9D9" }, // abu-abu
+      },
+      border: {
+        top: { style: "thin", color: { auto: 1 } },
+        right: { style: "thin", color: { auto: 1 } },
+        bottom: { style: "thin", color: { auto: 1 } },
+        left: { style: "thin", color: { auto: 1 } },
+      },
+    }
+
+    const allBorderStyle = {
+      border: {
+        top: { style: "thin", color: { auto: 1 } },
+        right: { style: "thin", color: { auto: 1 } },
+        bottom: { style: "thin", color: { auto: 1 } },
+        left: { style: "thin", color: { auto: 1 } },
+      },
+    }
+
+    const range = XLSX.utils.decode_range(worksheet["!ref"])
+
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cell_address = { r: R, c: C }
+        const cell_ref = XLSX.utils.encode_cell(cell_address)
+        if (!worksheet[cell_ref]) continue
+
+        // Header
+        if (R === 0) {
+          worksheet[cell_ref].s = headerCellStyle
+        } else {
+          worksheet[cell_ref].s = allBorderStyle
+        }
+      }
+    }
+
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1")
+
+    XLSX.writeFile(workbook, "template_soal_styled.xlsx")
+  }
+
   // Handle file upload and parsing
   const handleUpload = async () => {
     if (!file) {
@@ -127,25 +265,49 @@ export default function ImportModule() {
       }
 
       const data = await response.json()
-      console.log(data)
-
-      setParsedData(data)
-      // Set jenis to "pilihan_ganda" for all questions and handle column shift
-      const processedData = data.map((subject) => ({
-        ...subject,
-        module: subject.module.map((module) => ({
-          ...module,
-          soal: module.soal.map((question) => ({
-            ...question,
-            // Set jenis to "pilihan_ganda" for all questions
-            jenis: "pilihan_ganda",
-          })),
-        })),
-      }))
-
-      console.log("Processed data:", processedData)
-      setParsedData(processedData)
       console.log("Original data:", data)
+
+      setRawImportedData(data) // simpan di state
+
+      //   if (!data || !guruMapel) return
+      //   // Ambil daftar nama mapel dari guruMapel
+      //   const validMapelNames = guruMapel.map((item) =>
+      //     item.mapel.toLowerCase(),
+      //   )
+
+      //   const validSubjects = []
+      //   const invalidSubjects = []
+
+      //   data.forEach((subject) => {
+      //     const isValid = validMapelNames.includes(subject.mapel.toLowerCase())
+      //     if (isValid) {
+      //       validSubjects.push(subject)
+      //     } else {
+      //       invalidSubjects.push(subject)
+      //     }
+      //   })
+
+      //   setParsedData(data)
+      //   // Set jenis to "pilihan_ganda" for all questions and handle column shift
+      //   const processedData = data.map((subject) => ({
+      //     ...subject,
+      //     module: subject.module.map((module) => ({
+      //       ...module,
+      //       soal: module.soal.map((question) => ({
+      //         ...question,
+      //         // Set jenis to "pilihan_ganda" for all questions
+      //         jenis: "pilihan_ganda",
+      //       })),
+      //     })),
+      //   }))
+
+      //   // Simpan data yang tidak valid
+      //   setInvalidData(invalidSubjects)
+
+      //   console.log("Processed data:", processedData)
+      //   setParsedData(processedData)
+      //   console.log("Original data:", data)
+      // }, [data, guruMapel])
 
       // Initialize expanded states for modules
       const moduleStates = {}
@@ -162,6 +324,69 @@ export default function ImportModule() {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    console.log("invalid data lenth : ", invalidData.length)
+
+    if (invalidData.length > 0) {
+      const invalidNames = invalidData.map((item) => item.mapel).join(", ")
+      setError(
+        `⚠️ Ditemukan ${invalidData.length} Mata Pelajaran Invalid : ${invalidNames}. Silahkan cek kembali matapelajaran yang anda import atau hubungi admin`,
+      )
+    }
+  }, [invalidData])
+
+  useEffect(() => {
+    if (!rawImportedData || !guruMapel) return
+    if (userData?.role === "guru") {
+      const validMapelNames = guruMapel.map((item) => item.mapel.toLowerCase())
+
+      const validSubjects = []
+      const invalidSubjects = []
+
+      rawImportedData.forEach((subject) => {
+        const isValid = validMapelNames.includes(subject.mapel.toLowerCase())
+        if (isValid) {
+          validSubjects.push(subject)
+        } else {
+          invalidSubjects.push(subject)
+        }
+      })
+      setInvalidData(invalidSubjects)
+
+      const processedData = validSubjects.map((subject) => ({
+        ...subject,
+        module: subject.module.map((module) => ({
+          ...module,
+          soal: module.soal.map((question) => ({
+            ...question,
+            jenis: "pilihan_ganda",
+          })),
+        })),
+      }))
+
+      setParsedData(processedData)
+
+      console.log("Processed data:", processedData)
+    }
+    if (userData?.role === "admin") {
+      // Tidak perlu validasi guruMapel, semua data valid
+      const processedData = rawImportedData.map((subject) => ({
+        ...subject,
+        module: subject.module.map((module) => ({
+          ...module,
+          soal: module.soal.map((question) => ({
+            ...question,
+            jenis: "pilihan_ganda",
+          })),
+        })),
+      }))
+
+      setParsedData(processedData)
+      setInvalidData([]) // Tidak ada data tidak valid untuk admin
+      console.log("Processed data (admin):", processedData)
+    }
+  }, [rawImportedData, guruMapel])
 
   // Toggle module expansion
   const toggleModule = (subjectIndex, moduleIndex) => {
@@ -379,7 +604,10 @@ export default function ImportModule() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => setFile(null)}
+                    onClick={() => {
+                      setFile(null)
+                      setInvalidData([])
+                    }}
                     className="text-xs text-red-600 hover:text-red-800 font-medium"
                   >
                     Remove file
@@ -417,7 +645,34 @@ export default function ImportModule() {
             </div>
           </div>
 
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex justify-between">
+            {/* <a
+              href="/doc/Import-Module-Template.xlsx" // Ganti dengan URL file sebenarnya
+              download
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-700 font-medium disabled:bg-indigo-400 disabled:cursor-not-allowed flex items-center"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Template
+                </>
+              )}
+            </a> */}
+            <button
+              type="button"
+              onClick={handleTemplate}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium disabled:bg-indigo-400 disabled:cursor-not-allowed flex items-center"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Unduh Template
+            </button>
             <button
               type="button"
               onClick={handleUpload}
@@ -856,7 +1111,7 @@ export default function ImportModule() {
                 <div className="flex-shrink-0">
                   <HelpCircle className="h-5 w-5 text-indigo-600" />
                 </div>
-                <div className="ml-3">
+                {/* <div className="ml-3">
                   <h3 className="text-sm font-medium text-indigo-800">
                     Editing Instructions
                   </h3>
@@ -891,6 +1146,45 @@ export default function ImportModule() {
                         The "jenis" column has been removed from the Excel
                         template
                       </li>
+                    </ul>
+                  </div>
+                </div> */}
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-indigo-800">
+                    Instruksi Pengeditan
+                  </h3>
+                  <div className="mt-2 text-sm text-indigo-700">
+                    <p className="mb-1">
+                      Kamu dapat mengedit soal dan opsi dengan mengklik ikon
+                      edit:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>Klik tombol edit di samping soal atau opsi</li>
+                      <li>
+                        Gunakan editor teks kaya (rich text) untuk melakukan
+                        perubahan
+                      </li>
+                      <li>Simpan perubahan setelah selesai</li>
+                      <li>Semua konten HTML akan dipertahankan dengan baik</li>
+                    </ul>
+                    <p className="mt-2 mb-1">
+                      Kamu juga dapat menghapus item dengan mengklik ikon tempat
+                      sampah:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>Hapus mapel, modul, atau soal individual</li>
+                      <li>Akan muncul dialog konfirmasi sebelum penghapusan</li>
+                      <li>
+                        Penghapusan tidak dapat dibatalkan setelah disimpan
+                      </li>
+                    </ul>
+                    <p className="mt-2 mb-1">Catatan penting:</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>
+                        Semua soal secara otomatis diset sebagai tipe "Pilihan
+                        Ganda"
+                      </li>
+                      <li>Kolom "jenis" telah dihapus dari template Excel</li>
                     </ul>
                   </div>
                 </div>

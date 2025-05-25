@@ -20,7 +20,6 @@ import DeleteMapelModal from "../../../components/MapelPage/DeleteMapelModal"
 export default function AdminPage() {
   const navigate = useNavigate()
   const [mapel, setMapel] = useState([])
-  // const [filteredMapel, setFilteredMapel] = useState([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
@@ -34,6 +33,7 @@ export default function AdminPage() {
     total: 0,
     byKelas: {},
   })
+  const [guruOrAdmin, setGuruOrAdmin] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const userData = JSON.parse(localStorage.getItem("user_data"))
   // Add these state variables
@@ -42,14 +42,24 @@ export default function AdminPage() {
   const [filteredMapel, setFilteredMapel] = useState([])
   // Use ref to track initialization
   const initialized = useRef(false)
+  const [page, setPage] = useState(1)
+  const [limit] = useState(10) // bisa dibuat bisa diubah juga kalau mau
+  const [totalData, setTotalData] = useState(0)
 
   useEffect(() => {
+    console.log(window.env.VITE_API_URL)
     console.log(userData.role)
+    console.log("useEffect1")
+
     // if ((userData && userData.role === "admin") || userData.role === "guru") {
-    if ((userData && userData.role === "admin") || userData?.role === "guru") {
+    if (userData && userData.role === "admin") {
+      setGuruOrAdmin(true)
       setIsAdmin(true)
-    } else {
+    } else if (userData?.role === "guru") {
+      setGuruOrAdmin(true)
       setIsAdmin(false)
+    } else {
+      setGuruOrAdmin(false)
     }
   }, [userData])
 
@@ -93,12 +103,88 @@ export default function AdminPage() {
   }
 
   // Update the fetchData function to use genericAllMapels when "all" is selected
+  // const fetchData = async () => {
+  //   try {
+  //     // Use genericAllMapels for "all" and genericMapels with id_kelas for specific class
+  //     const url =
+  //       selectedKelas === "all"
+  //         ? `${window.env.VITE_API_URL}/genericAllMapels`
+  //         : `${window.env.VITE_API_URL}/genericMapels?id_kelas=${selectedKelas}`
+
+  //     let response = await fetch(url, {
+  //       headers: {
+  //         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+  //       },
+  //     })
+
+  //     if (response.status === 401) {
+  //       const refreshed = await RefreshToken()
+  //       if (refreshed) {
+  //         response = await fetch(url, {
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+  //           },
+  //         })
+  //       } else {
+  //         window.location.href = "/login"
+  //         return
+  //       }
+  //     }
+
+  //     const data = await response.json()
+
+  //     if (data.Data) {
+  //       // Transform the data to match our component's expected structure
+  //       const transformedData = data.Data.map((item) => ({
+  //         id_mapel: item.id_mapel,
+  //         mapel: item.nama_mapel || item.mapel, // Handle both response formats
+  //         kelas: item.kelas,
+  //         modules_count: item.jumlah_modul,
+  //       }))
+
+  //       setMapel(transformedData)
+
+  //       // Calculate stats
+  //       const statsByKelas = {}
+
+  //       // Count mapel by kelas
+  //       data.Data.forEach((item) => {
+  //         const kelasId = item.kelas || "uncategorized"
+
+  //         if (statsByKelas[kelasId]) {
+  //           statsByKelas[kelasId].count++
+  //         } else {
+  //           statsByKelas[kelasId] = {
+  //             name: `Kelas ${kelasId}`,
+  //             count: 1,
+  //           }
+  //         }
+  //       })
+
+  //       setStats({
+  //         total: data.Data.length,
+  //         byKelas: statsByKelas,
+  //       })
+  //     } else {
+  //       setMapel([])
+  //       setFilteredMapel([])
+  //     }
+  //   } catch (error) {
+  //     console.error("Fetch error:", error)
+  //     setMapel([])
+  //     setFilteredMapel([])
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+
+  // Update the fetchData function to use genericAllMapels when "all" is selected
   const fetchData = async () => {
     try {
       // Use genericAllMapels for "all" and genericMapels with id_kelas for specific class
       const url =
         selectedKelas === "all"
-          ? `${window.env.VITE_API_URL}/genericAllMapels`
+          ? `${window.env.VITE_API_URL}/genericAllMapels?page=${page}&limit=${limit}`
           : `${window.env.VITE_API_URL}/genericMapels?id_kelas=${selectedKelas}`
 
       let response = await fetch(url, {
@@ -132,8 +218,7 @@ export default function AdminPage() {
           modules_count: item.jumlah_modul,
         }))
 
-        setMapel(transformedData)
-        // setFilteredMapel(transformedData)
+        setMapel(transformedData || [])
 
         // Calculate stats
         const statsByKelas = {}
@@ -153,7 +238,7 @@ export default function AdminPage() {
         })
 
         setStats({
-          total: data.Data.length,
+          total: data.total,
           byKelas: statsByKelas,
         })
       } else {
@@ -170,56 +255,96 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
+    console.log("useEffect2")
+    console.log(
+      `fetch from : ${window.env.VITE_API_URL}/guru/${localStorage.getItem("guru_mapel")}`,
+    )
+
     if (initialized.current) return
     const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
     setUserRole(userData.role || "")
 
     // If user is a teacher, get their subjects
     if (userData.role === "guru") {
-      const guruMapel = JSON.parse(localStorage.getItem("guru_mapel") || "[]")
-      console.log("Teacher subjects:", guruMapel)
-      setTeacherSubjects(guruMapel)
+      fetchGuruMapel(userData.id, localStorage.getItem("access_token"))
     }
     fetchKelasData()
-    fetchData()
     // }, [selectedKelas]) // Refetch when selectedKelas changes
     initialized.current = true
   }, [])
 
   useEffect(() => {
+    console.log("useEffect3")
+
     if (mapel.length > 0) {
+      console.log("masuk kondisi 1")
+
       let filtered = [...mapel]
 
-      // Apply role-based filtering
-      if (userRole === "guru" && teacherSubjects.length > 0) {
-        // const filtered = mapel.filter((item) =>
-        filtered = mapel.filter((item) =>
+      // if (userRole === "guru" && teacherSubjects.length > 0) {
+      if (userRole === "guru") {
+        filtered = filtered.filter((item) =>
           teacherSubjects.some(
             (subject) => Number(subject.id_mapel) === Number(item.id_mapel),
           ),
         )
       }
 
-      // Filter mapel based on search term
       if (searchTerm) {
-        const filtered = mapel.filter((item) =>
+        filtered = filtered.filter((item) =>
           item.mapel.toLowerCase().includes(searchTerm.toLowerCase()),
         )
       }
+
       setFilteredMapel(filtered)
     } else {
-      // setFilteredMapel(mapel)
+      console.log("masuk kondisi 2")
+
       setFilteredMapel([])
     }
-    // }, [searchTerm, mapel])
   }, [mapel, userRole, teacherSubjects, searchTerm])
 
   // Refetch when selectedKelas changes
   useEffect(() => {
+    console.log("useEffect4")
+
     if (initialized.current) {
       fetchData()
     }
-  }, [selectedKelas])
+  }, [selectedKelas, page])
+
+  const fetchGuruMapel = async (guruId, accessToken) => {
+    try {
+      const guruResponse = await fetch(
+        `${window.env.VITE_API_URL}/guru/${guruId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      )
+
+      if (!guruResponse.ok) {
+        throw new Error(`Failed to fetch guru data: ${guruResponse.status}`)
+      }
+
+      const guruData = await guruResponse.json()
+      console.log("Teacher data received:", guruData.mapel)
+      if (guruData.mapel) {
+        setTeacherSubjects(guruData.mapel)
+      } else {
+        setTeacherSubjects([])
+      }
+
+      if (guruData && Array.isArray(guruData.mapel)) {
+        localStorage.setItem("guru_mapel", JSON.stringify(guruData.mapel))
+        console.log("Stored teacher subjects:", guruData.mapel)
+      }
+    } catch (err) {
+      console.error("Error fetching teacher subjects:", err)
+      throw err // optional: rethrow if needed
+    }
+  }
 
   const handleRowClick = (id) => {
     navigate(`/list-module/${id}`)
@@ -277,7 +402,7 @@ export default function AdminPage() {
     navigate("/import-module")
   }
 
-  if (!isAdmin) {
+  if (!guruOrAdmin) {
     return (
       <div className="p-8 bg-red-50 rounded-xl border border-red-200">
         <h2 className="text-xl font-semibold text-red-700">Akses Ditolak</h2>
@@ -403,25 +528,26 @@ export default function AdminPage() {
                 <span className="hidden sm:inline">Refresh</span>
               </button>
 
-              {/* <button
+              <button
                 onClick={handleImportModule}
                 className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
               >
                 <Upload size={18} />
                 <span className="hidden sm:inline">Import Module</span>
-              </button> */}
-
-              <button
-                onClick={() => {
-                  setIsEditMode(false)
-                  setEditMapel(null)
-                  setIsModalOpen(true)
-                }}
-                className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                <Plus size={18} />
-                <span className="hidden sm:inline">Tambah Mapel</span>
               </button>
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    setIsEditMode(false)
+                    setEditMapel(null)
+                    setIsModalOpen(true)
+                  }}
+                  className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  <Plus size={18} />
+                  <span className="hidden sm:inline">Tambah Mapel</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -534,7 +660,7 @@ export default function AdminPage() {
         )}
 
         {/* Footer with pagination */}
-        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+        {/* <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
             Menampilkan{" "}
             <span className="font-medium">{filteredMapel.length}</span> dari{" "}
@@ -546,6 +672,34 @@ export default function AdminPage() {
               Sebelumnya
             </button>
             <button className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+              Selanjutnya
+            </button>
+          </div>
+        </div> */}
+        {/* Footer with pagination */}
+        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+          <div className="text-sm text-gray-500">
+            Menampilkan <span className="font-medium">{mapel.length}</span> mata
+            pelajaran
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              disabled={page === 1}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              Sebelumnya
+            </button>
+            <button
+              onClick={() => {
+                if (mapel.length === limit) {
+                  setPage((prev) => prev + 1)
+                }
+              }}
+              disabled={mapel.length < limit}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
               Selanjutnya
             </button>
           </div>

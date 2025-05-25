@@ -104,10 +104,13 @@ export default function Login() {
           )
 
           if (guruResponse.ok) {
-            console.log("Teacher data received:", guruData)
             const guruData = await guruResponse.json()
-            if (guruData && Array.isArray(guruData.mapel)) {
+            console.log("Teacher data received:", guruData)
+            // if (guruData && Array.isArray(guruData.mapel)) {
+            if (guruData.mapel) {
               // Store teacher's subjects in localStorage
+              console.log("guru data masuk")
+              console.log(guruData)
               localStorage.setItem("guru_mapel", JSON.stringify(guruData.mapel))
               console.log("Stored teacher subjects:", guruData.mapel)
             }

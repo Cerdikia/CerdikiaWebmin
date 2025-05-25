@@ -132,7 +132,7 @@ export default function Sidebar({ isOpen, toggleSidebar, isMobile }) {
         { path: "/score-report", label: "Score Report", icon: FileText },
         { path: "/semester-recap", label: "Semester Recap", icon: Archive },
       ],
-      roles: ["admin", "guru"],
+      roles: ["admin", "guru", "kepalaSekolah"],
     },
     {
       path: "/users",

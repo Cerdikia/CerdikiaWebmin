@@ -55,22 +55,6 @@ export default function UserForm() {
     { value: "olahraga", label: "Guru Olahraga" },
   ]
 
-  // Function to get subject description based on jabatan
-  // const getSubjectsByJabatan = (jabatan) => {
-  //   switch (jabatan) {
-  //     case "walikelas":
-  //       return "Semua mata pelajaran kecuali Bahasa Inggris, Bahasa Daerah, dan Olahraga"
-  //     case "inggris":
-  //       return "Bahasa Inggris"
-  //     case "daerah":
-  //       return "Bahasa Daerah"
-  //     case "olahraga":
-  //       return "Pendidikan Jasmani dan Kesehatan"
-  //     default:
-  //       return ""
-  //   }
-  // }
-
   // Add this function to fetch available classes for students
   const [classes, setClasses] = useState([])
   const [loadingClasses, setLoadingClasses] = useState(false)
@@ -87,8 +71,10 @@ export default function UserForm() {
 
         if (response.ok) {
           const data = await response.json()
-          if (data.Message === "Success" && Array.isArray(data.Data)) {
-            setClasses(data.Data)
+          console.log("kelas", data)
+
+          if (data) {
+            setClasses(data)
           }
         }
       } catch (error) {
@@ -146,6 +132,8 @@ export default function UserForm() {
 
         if (response.ok) {
           const data = await response.json()
+          console.log("guru mapel response")
+          console.log(data)
           if (data && Array.isArray(data.mapel)) {
             setSelectedSubjects(data.mapel)
             setInitialSubjects(data.mapel)
@@ -514,39 +502,6 @@ export default function UserForm() {
       return false
     }
   }
-
-  // Function to delete all teacher-subject relations
-  // const deleteAllTeacherSubjects = async (teacherId) => {
-  //   if (!teacherId) return true
-
-  //   try {
-  //     const response = await fetch(
-  //       `${window.env.VITE_API_URL}/guru_mapel/batch`,
-  //       {
-  //         method: "DELETE",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-  //         },
-  //         body: JSON.stringify({
-  //           teacher_ids: [teacherId],
-  //         }),
-  //       },
-  //     )
-
-  //     if (!response.ok) {
-  //       const data = await response.json()
-  //       throw new Error(data.error || "Failed to delete teacher subjects")
-  //     }
-
-  //     setSelectedSubjects([])
-  //     return true
-  //   } catch (error) {
-  //     console.error("Error deleting teacher subjects:", error)
-  //     setError("Failed to delete subject assignments. Please try again.")
-  //     return false
-  //   }
-  // }
 
   // Replace the handleSubmit function with this improved version
   const handleSubmit = async (e) => {
@@ -958,7 +913,11 @@ export default function UserForm() {
                     value={formData.jabatan}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    // className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    disabled={!isAdmin} // Only admin can change roles
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      !isAdmin ? "bg-gray-100 cursor-not-allowed" : ""
+                    }`}
                   >
                     <option value="">Pilih Jabatan</option>
                     {jabatanOptions.map((option) => (
@@ -967,20 +926,12 @@ export default function UserForm() {
                       </option>
                     ))}
                   </select>
-                </div>
-
-                {/* {formData.jabatan && (
-                  <div className="md:col-span-2">
-                    <p className="text-sm font-medium text-gray-700 mb-1">
-                      Mata Pelajaran yang Ditangani:
+                  {!isAdmin && (
+                    <p className="text-xs text-amber-600 mt-1">
+                      Hanya admin yang dapat mengubah role pengguna.
                     </p>
-                    <div className="p-3 bg-gray-50 rounded-md">
-                      <p className="text-gray-600">
-                        {getSubjectsByJabatan(formData.jabatan)}
-                      </p>
-                    </div>
-                  </div>
-                )} */}
+                  )}
+                </div>
 
                 <div className="md:col-span-2">
                   {/* <label className="block text-sm font-medium text-gray-700 mb-1"> */}
@@ -988,7 +939,7 @@ export default function UserForm() {
                     <label className="block text-sm font-medium text-gray-700">
                       Pilih Mata Pelajaran yang Ditangani
                     </label>
-                    {isEditMode && selectedSubjects.length > 0 && (
+                    {isAdmin && isEditMode && selectedSubjects.length > 0 && (
                       <button
                         type="button"
                         onClick={() => {
@@ -1012,9 +963,12 @@ export default function UserForm() {
                   <div className="flex items-center space-x-2">
                     <select
                       id="subject-select"
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className={`flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500${
+                        !isAdmin ? "bg-gray-100 cursor-not-allowed" : ""
+                      }`}
                       onChange={handleAddSubject}
-                      disabled={loadingSubjects}
+                      // disabled={loadingSubjects}
+                      disabled={loadingSubjects || !isAdmin}
                       value=""
                     >
                       <option value="">Pilih Mata Pelajaran</option>
@@ -1026,10 +980,18 @@ export default function UserForm() {
                     </select>
                     <button
                       type="button"
-                      className="p-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                      onClick={() =>
-                        document.getElementById("subject-select").focus()
-                      }
+                      className={`p-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 ${
+                        !isAdmin ? "bg-gray-100 cursor-not-allowed" : ""
+                      }`}
+                      // onClick={() =>
+                      //   document.getElementById("subject-select").focus()
+                      // }
+                      onClick={() => {
+                        if (isAdmin) {
+                          document.getElementById("subject-select").focus()
+                        }
+                      }}
+                      disabled={!isAdmin}
                     >
                       <Plus size={20} />
                     </button>
@@ -1042,22 +1004,40 @@ export default function UserForm() {
 
                   {selectedSubjects.length > 0 && (
                     <div className="mt-3">
-                      <p className="text-sm font-medium text-gray-700 mb-2">
+                      {/* <p className="text-sm font-medium text-gray-700 mb-2">
                         Mata Pelajaran yang Dipilih:
-                      </p>
+                      </p> */}
                       <div className="flex flex-wrap gap-2">
                         {selectedSubjects.map((subject) => (
                           <span
                             key={subject.id_mapel}
-                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800"
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 ${
+                              !isAdmin ? "bg-gray-100 cursor-not-allowed" : ""
+                            }`}
                           >
                             {subject.mapel}
-                            <button
+                            {/* <button
                               type="button"
                               onClick={() =>
                                 handleRemoveSubject(subject.id_mapel)
                               }
                               className="ml-1.5 text-indigo-600 hover:text-indigo-800"
+                            >
+                              <X size={16} />
+                            </button> */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (isAdmin) {
+                                  handleRemoveSubject(subject.id_mapel)
+                                }
+                              }}
+                              disabled={!isAdmin}
+                              className={`ml-1.5 text-indigo-600 hover:text-indigo-800 ${
+                                !isAdmin
+                                  ? "cursor-not-allowed hover:text-gray-400"
+                                  : ""
+                              }`}
                             >
                               <X size={16} />
                             </button>
@@ -1110,7 +1090,7 @@ export default function UserForm() {
                   <option value="">Pilih Kelas</option>
                   {classes.map((kelas) => (
                     <option key={kelas.id} value={kelas.id}>
-                      {kelas.nama_kelas}
+                      {kelas.kelas}
                     </option>
                   ))}
                 </select>

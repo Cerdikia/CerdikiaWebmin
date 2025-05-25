@@ -53,7 +53,7 @@ export default function UserList() {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
-      )
+      })
 
       if (response.status === 401) {
         const refreshed = await RefreshToken()
@@ -62,7 +62,7 @@ export default function UserList() {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
-          )
+          })
         } else {
           navigate("/login", { replace: true })
           return
