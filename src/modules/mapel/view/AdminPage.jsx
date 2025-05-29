@@ -47,9 +47,9 @@ export default function AdminPage() {
   const [totalData, setTotalData] = useState(0)
 
   useEffect(() => {
-    console.log(window.env.VITE_API_URL)
-    console.log(userData.role)
-    console.log("useEffect1")
+    // console.log(window.env.VITE_API_URL)
+    // console.log(userData.role)
+    // console.log("useEffect1")
 
     // if ((userData && userData.role === "admin") || userData.role === "guru") {
     if (userData && userData.role === "admin") {
@@ -64,7 +64,7 @@ export default function AdminPage() {
   }, [userData])
 
   const handleSaveMapel = (mapelData) => {
-    console.log("Mata pelajaran baru/update:", mapelData)
+    // console.log("Mata pelajaran baru/update:", mapelData)
     fetchData()
     setIsEditMode(false)
     setEditMapel(null)
@@ -255,10 +255,10 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
-    console.log("useEffect2")
-    console.log(
-      `fetch from : ${window.env.VITE_API_URL}/guru/${localStorage.getItem("guru_mapel")}`,
-    )
+    // console.log("useEffect2")
+    // console.log(
+    //   `fetch from : ${window.env.VITE_API_URL}/guru/${localStorage.getItem("guru_mapel")}`,
+    // )
 
     if (initialized.current) return
     const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
@@ -274,10 +274,10 @@ export default function AdminPage() {
   }, [])
 
   useEffect(() => {
-    console.log("useEffect3")
+    // console.log("useEffect3")
 
     if (mapel.length > 0) {
-      console.log("masuk kondisi 1")
+      // console.log("masuk kondisi 1")
 
       let filtered = [...mapel]
 
@@ -298,7 +298,7 @@ export default function AdminPage() {
 
       setFilteredMapel(filtered)
     } else {
-      console.log("masuk kondisi 2")
+      // console.log("masuk kondisi 2")
 
       setFilteredMapel([])
     }
@@ -306,7 +306,7 @@ export default function AdminPage() {
 
   // Refetch when selectedKelas changes
   useEffect(() => {
-    console.log("useEffect4")
+    // console.log("useEffect4")
 
     if (initialized.current) {
       fetchData()
@@ -329,7 +329,7 @@ export default function AdminPage() {
       }
 
       const guruData = await guruResponse.json()
-      console.log("Teacher data received:", guruData.mapel)
+      // console.log("Teacher data received:", guruData.mapel)
       if (guruData.mapel) {
         setTeacherSubjects(guruData.mapel)
       } else {
@@ -338,7 +338,7 @@ export default function AdminPage() {
 
       if (guruData && Array.isArray(guruData.mapel)) {
         localStorage.setItem("guru_mapel", JSON.stringify(guruData.mapel))
-        console.log("Stored teacher subjects:", guruData.mapel)
+        // console.log("Stored teacher subjects:", guruData.mapel)
       }
     } catch (err) {
       console.error("Error fetching teacher subjects:", err)

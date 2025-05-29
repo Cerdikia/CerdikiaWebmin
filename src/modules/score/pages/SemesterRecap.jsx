@@ -60,7 +60,7 @@ export default function SemesterRecap() {
 
   // Fetch initial data
   useEffect(() => {
-    console.log(localStorage.getItem("access_token"))
+    // console.log(localStorage.getItem("access_token"))
 
     fetchRecapData()
     fetchClasses()
@@ -124,7 +124,7 @@ export default function SemesterRecap() {
   }
 
   const fetchClasses = async () => {
-    console.log("runing fetch class")
+    // console.log("runing fetch class")
 
     try {
       const token = localStorage.getItem("access_token")
@@ -217,7 +217,7 @@ export default function SemesterRecap() {
       if (createForm.filter_mapel)
         requestBody.id_mapel = createForm.filter_mapel
 
-      console.log("request body : ", requestBody)
+      // console.log("request body : ", requestBody)
 
       const response = await FetchData({
         // url: `${window.env.VITE_API_URL}/rekap-semester`,
@@ -577,10 +577,10 @@ export default function SemesterRecap() {
         </div>
 
         {/* Filters */}
-        {console.log("kondisi 1", classes)}
+        {/* {console.log("kondisi 1", classes)} */}
         {showFilters && (
           <div className="p-4 mb-6 bg-gray-50 border border-gray-200 rounded-lg">
-            {console.log("kondisi 2", classes)}
+            {/* {console.log("kondisi 2", classes)} */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div>
                 <label
@@ -612,7 +612,7 @@ export default function SemesterRecap() {
                 >
                   Kelas
                 </label>
-                {console.log(classes)}
+                {/* {console.log(classes)} */}
                 <select
                   id="id_kelas"
                   value={filters.id_kelas}

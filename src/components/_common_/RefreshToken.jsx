@@ -2,7 +2,7 @@ export default async function RefreshToken() {
   try {
     const refreshToken = localStorage.getItem("refresh_token") // ambil refresh_token dari localStorage
 
-    console.log(`ini refresh token : ${refreshToken}`)
+    // console.log(`ini refresh token : ${refreshToken}`)
 
     if (!refreshToken) {
       throw new Error("Refresh token tidak ditemukan")

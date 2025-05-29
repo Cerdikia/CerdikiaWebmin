@@ -28,7 +28,7 @@ const MessageList = () => {
         token,
       })
 
-      console.log(response)
+      // console.log(response)
 
       if (response && response.Data) {
         setMessages(response.Data)
@@ -160,7 +160,7 @@ const MessageList = () => {
     }
   }
 
-  console.log(filteredMessages)
+  // console.log(filteredMessages)
 
   return (
     <div className="p-6">

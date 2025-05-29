@@ -74,7 +74,7 @@ export default function StudentVerification() {
       }
 
       const data = await response.json()
-      console.log(data)
+      // console.log(data)
 
       if (data.Data) {
         // Transform data if needed

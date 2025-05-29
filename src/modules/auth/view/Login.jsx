@@ -8,6 +8,8 @@ import {
   signInWithRedirect,
   getRedirectResult,
 } from "firebase/auth"
+
+import { HelpCircle, Download } from "lucide-react"
 import { auth } from "../../../firebase-config"
 
 const provider = new GoogleAuthProvider()
@@ -23,24 +25,23 @@ export default function Login() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    console.log(window.env.VITE_API_URL)
-    // Handle redirect result
+    // Cek hasil dari signInWithRedirect jika ada
     getRedirectResult(auth)
       .then((result) => {
+        // console.log("result : ", result)
         if (result && result.user) {
           const userEmail = result.user.email
           setEmail(userEmail)
         }
       })
       .catch((error) => {
-        console.error("Redirect login error:", error)
-        setError("Login gagal: " + error.message)
+        console.error("Gagal login dengan redirect:", error)
       })
   }, [])
 
   useEffect(() => {
     if (email) {
-      console.log("Email berhasil diset:", email)
+      // console.log("Email berhasil diset:", email)
     }
   }, [email])
 
@@ -93,7 +94,7 @@ export default function Login() {
       // If the user is a guru, fetch their subjects
       if (role === "guru" && data.Data.id) {
         try {
-          console.log("Fetching teacher subjects for ID:", data.Data.id)
+          // console.log("Fetching teacher subjects for ID:", data.Data.id)
           const guruResponse = await fetch(
             `${window.env.VITE_API_URL}/guru/${data.Data.id}`,
             {
@@ -105,14 +106,14 @@ export default function Login() {
 
           if (guruResponse.ok) {
             const guruData = await guruResponse.json()
-            console.log("Teacher data received:", guruData)
+            // console.log("Teacher data received:", guruData)
             // if (guruData && Array.isArray(guruData.mapel)) {
             if (guruData.mapel) {
               // Store teacher's subjects in localStorage
-              console.log("guru data masuk")
-              console.log(guruData)
+              // console.log("guru data masuk")
+              // console.log(guruData)
               localStorage.setItem("guru_mapel", JSON.stringify(guruData.mapel))
-              console.log("Stored teacher subjects:", guruData.mapel)
+              // console.log("Stored teacher subjects:", guruData.mapel)
             }
           } else {
             console.error(
@@ -287,6 +288,59 @@ export default function Login() {
               )}
             </button>
           </form>
+          {/* ==================================== */}
+          <div className="mt-6 bg-white p-4 rounded-xl border border-indigo-200 shadow-sm">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <HelpCircle className="h-6 w-6 text-indigo-600 mt-1" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-base font-semibold text-indigo-800 mb-1">
+                  Instruksi Penggunaan
+                </h3>
+                {/* <p className="text-sm text-gray-700">
+                  Dokumentasi penggunaan aplikasi webmin:
+                  <br />
+                  <a
+                    href={window.env.VITE_WEB_DOC}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-600 underline hover:text-indigo-800"
+                  >
+                    {window.env.VITE_WEB_DOC}
+                  </a>
+                </p> */}
+                <p className="text-sm text-gray-700 mt-3">
+                  Dokumentasi Penggunaan Aplikasi android:
+                  <br />
+                  <a
+                    href={window.env.VITE_APP_DOC}
+                    download
+                    className="text-indigo-600 underline hover:text-indigo-800"
+                  >
+                    {window.env.VITE_APP_DOC}
+                  </a>
+                </p>
+              </div>
+            </div>
+            {/* Tombol Download Aplikasi */}
+            <div className="mt-4 text-center">
+              <a
+                href={window.env.VITE_APP_DOWNLOAD}
+                download
+                className="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition"
+              >
+                <img
+                  src="img/cerdikia-icon-crop-png.png"
+                  // src="img/cerdikia-icon-png.png"
+                  alt="App Icon"
+                  className="w-6 h-6 mr-2"
+                />
+                Download Aplikasi Android
+              </a>
+            </div>
+          </div>
+          {/* ========================== */}
         </div>
       </div>
     </div>

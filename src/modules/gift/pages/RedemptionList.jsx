@@ -73,7 +73,7 @@ export default function RedemptionList() {
 
       const data = await response.json()
 
-      console.log(data)
+      // console.log(data)
 
       if (data.data) {
         setRedemptions(data.data)

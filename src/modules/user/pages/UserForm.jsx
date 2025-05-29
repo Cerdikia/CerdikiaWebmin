@@ -71,7 +71,7 @@ export default function UserForm() {
 
         if (response.ok) {
           const data = await response.json()
-          console.log("kelas", data)
+          // console.log("kelas", data)
 
           if (data) {
             setClasses(data)
@@ -132,8 +132,8 @@ export default function UserForm() {
 
         if (response.ok) {
           const data = await response.json()
-          console.log("guru mapel response")
-          console.log(data)
+          // console.log("guru mapel response")
+          // console.log(data)
           if (data && Array.isArray(data.mapel)) {
             setSelectedSubjects(data.mapel)
             setInitialSubjects(data.mapel)
@@ -774,7 +774,7 @@ export default function UserForm() {
 
       // If user data was saved successfully and we have an image to upload, do that next
       if (imageFile) {
-        console.log("New image detected, uploading...")
+        // console.log("New image detected, uploading...")
         const imageUploaded = await uploadImage(formData.email)
         if (!imageUploaded) {
           setSuccess("User data saved, but image upload failed.")

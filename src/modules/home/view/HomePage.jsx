@@ -250,7 +250,7 @@ export default function HomePage() {
 
   // Mock data for demonstration
   useEffect(() => {
-    console.log(`Bearer ${localStorage.getItem("access_token")}`)
+    // console.log(`Bearer ${localStorage.getItem("access_token")}`)
 
     const fetchData = async () => {
       try {

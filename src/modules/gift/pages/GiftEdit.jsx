@@ -173,7 +173,7 @@ export default function GiftEdit() {
       }
 
       // Make the API request
-      console.log("API hit", `${window.env.VITE_API_URL}/gifts/${id}`)
+      // console.log("API hit", `${window.env.VITE_API_URL}/gifts/${id}`)
 
       let response = await fetch(`${window.env.VITE_API_URL}/gifts/${id}`, {
         method: "PUT",

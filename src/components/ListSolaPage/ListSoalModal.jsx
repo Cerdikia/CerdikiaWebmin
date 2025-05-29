@@ -104,8 +104,8 @@ export default function ListSoalModal({
 
           {showField("id_mapel") && (
             <div>
-              {console.log("ini detail data")}
-              {console.log(detailData)}
+              {/* {console.log("ini detail data")} */}
+              {/* {console.log(detailData)} */}
               <label className="block mb-1">{detailData.title}</label>
               <input
                 type="text"

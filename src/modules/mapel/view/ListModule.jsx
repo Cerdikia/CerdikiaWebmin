@@ -47,7 +47,7 @@ export default function ListModule() {
   }, [userData])
 
   const handleSaveModule = (moduleData) => {
-    console.log("Module baru/update:", moduleData)
+    // console.log("Module baru/update:", moduleData)
     fetchData()
     setIsEditMode(false)
     setEditModule(null)
@@ -83,7 +83,7 @@ export default function ListModule() {
   }
 
   const fetchData = async () => {
-    console.log("fetchDatadijalankan")
+    // console.log("fetchDatadijalankan")
     try {
       setLoading(true)
       let response = await fetch(
@@ -148,13 +148,13 @@ export default function ListModule() {
     // Skip if already initialized
     if (isInitialized.current) return
 
-    console.log("Initializing ListModule component")
+    // console.log("Initializing ListModule component")
 
     // Check authorization first
     const authorized = checkAuthorization()
 
     // If authorized, fetch data
-    console.log("check authorization dijakankan")
+    // console.log("check authorization dijakankan")
 
     if (authorized) {
       getMataPelajaran(id)
@@ -179,7 +179,7 @@ export default function ListModule() {
     // Skip the first initialization (handled by the effect above)
     if (!isInitialized.current) return
 
-    console.log("ID parameter changed, rechecking authorization")
+    // console.log("ID parameter changed, rechecking authorization")
 
     // Check authorization for the new ID
     const authorized = checkAuthorization()
@@ -293,7 +293,7 @@ export default function ListModule() {
 
   // Manual refresh handler that resets the fetch flag
   const handleRefresh = () => {
-    console.log("handleRefresh dijalankan")
+    // console.log("handleRefresh dijalankan")
 
     // dataFetchDone.current = false
     fetchData()

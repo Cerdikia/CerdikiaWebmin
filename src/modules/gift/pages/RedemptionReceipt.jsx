@@ -33,7 +33,7 @@ const RedemptionReceipt = () => {
           responseType: "text",
         })
 
-        console.log(response.data)
+        // console.log(response.data)
 
         setReceipt(response.data)
         setLoading(false)

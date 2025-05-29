@@ -265,7 +265,7 @@ export default function ImportModule() {
       }
 
       const data = await response.json()
-      console.log("Original data:", data)
+      // console.log("Original data:", data)
 
       setRawImportedData(data) // simpan di state
 
@@ -326,7 +326,7 @@ export default function ImportModule() {
   }
 
   useEffect(() => {
-    console.log("invalid data lenth : ", invalidData.length)
+    // console.log("invalid data lenth : ", invalidData.length)
 
     if (invalidData.length > 0) {
       const invalidNames = invalidData.map((item) => item.mapel).join(", ")
@@ -367,7 +367,7 @@ export default function ImportModule() {
 
       setParsedData(processedData)
 
-      console.log("Processed data:", processedData)
+      // console.log("Processed data:", processedData)
     }
     if (userData?.role === "admin") {
       // Tidak perlu validasi guruMapel, semua data valid
@@ -384,7 +384,7 @@ export default function ImportModule() {
 
       setParsedData(processedData)
       setInvalidData([]) // Tidak ada data tidak valid untuk admin
-      console.log("Processed data (admin):", processedData)
+      // console.log("Processed data (admin):", processedData)
     }
   }, [rawImportedData, guruMapel])
 
@@ -489,10 +489,10 @@ export default function ImportModule() {
       setTimeout(() => {
         navigate(`/admin-mapel`)
       }, 2000)
-      console.log(parsedData)
+      // console.log(parsedData)
     } catch (err) {
       // console.error("Save error:", err)
-      console.log(err)
+      // console.log(err)
 
       // setError(err.message || "Failed to save imported data")
       setError(`Failed to save imported data, ${err}`)
@@ -1111,44 +1111,6 @@ export default function ImportModule() {
                 <div className="flex-shrink-0">
                   <HelpCircle className="h-5 w-5 text-indigo-600" />
                 </div>
-                {/* <div className="ml-3">
-                  <h3 className="text-sm font-medium text-indigo-800">
-                    Editing Instructions
-                  </h3>
-                  <div className="mt-2 text-sm text-indigo-700">
-                    <p className="mb-1">
-                      You can edit questions and options by clicking the edit
-                      icon:
-                    </p>
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li>
-                        Click the edit button next to any question or option
-                      </li>
-                      <li>Use the rich text editor to make changes</li>
-                      <li>Save your changes when done</li>
-                      <li>All HTML content will be properly preserved</li>
-                    </ul>
-                    <p className="mt-2 mb-1">
-                      You can also delete items by clicking the trash icon:
-                    </p>
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li>Delete subjects, modules, or individual questions</li>
-                      <li>A confirmation dialog will appear before deletion</li>
-                      <li>Deletions cannot be undone after saving</li>
-                    </ul>
-                    <p className="mt-2 mb-1">Important notes:</p>
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li>
-                        All questions are automatically set to "Multiple Choice"
-                        type
-                      </li>
-                      <li>
-                        The "jenis" column has been removed from the Excel
-                        template
-                      </li>
-                    </ul>
-                  </div>
-                </div> */}
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-indigo-800">
                     Instruksi Pengeditan

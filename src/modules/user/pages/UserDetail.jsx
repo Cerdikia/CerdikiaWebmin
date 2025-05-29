@@ -59,7 +59,7 @@ export default function UserDetail() {
       }
 
       const data = await response.json()
-      console.log("API Response:", data) // Debug log
+      // console.log("API Response:", data) // Debug log
 
       // Check if data exists and handle both array and object responses
       if (
@@ -108,7 +108,7 @@ export default function UserDetail() {
 
         for (const newRole of roles) {
           try {
-            console.log(`Trying role: ${newRole}`) // Debug log
+            // console.log(`Trying role: ${newRole}`) // Debug log
             const altResponse = await fetch(
               `${window.env.VITE_API_URL}/getDataActor/${newRole}/${id}`,
               {
@@ -120,7 +120,7 @@ export default function UserDetail() {
 
             if (altResponse.ok) {
               const altData = await altResponse.json()
-              console.log(`Response for role ${newRole}:`, altData) // Debug log
+              // console.log(`Response for role ${newRole}:`, altData) // Debug log
 
               if (
                 altData.Message === "Success" ||
